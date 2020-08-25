@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RecyclerViewComponent,RecyclerViewType } from './../RecyclerViewComponent';
 import getStore from "../../store/summary/Store";
-import { Flex, Loader, Text, FocusZone } from '@fluentui/react-northstar';
+import { Flex, Loader, FocusZone } from '@fluentui/react-northstar';
 import { observer } from 'mobx-react';
 import { fetchNonResponders } from '../../actions/SummaryActions';
 import {Localizer} from '../../utils/Localizer';
@@ -9,7 +9,7 @@ import { UserInfoView, IUserInfoViewProps} from './../UserInfoView';
 import {ProgressState} from './../../utils/SharedEnum';
 
 /**
- * This class create the componenet to show non-responder's list
+ * It creates the component with non-responder's list
 */
 @observer
 export class NonResponderView extends React.Component {

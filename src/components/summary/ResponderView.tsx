@@ -15,7 +15,7 @@ import { ProgressState } from './../../utils/SharedEnum';
 import { UxUtils } from './../../utils/UxUtils';
 
 /**
- * This class create the componenet to show responder's list
+ * It creates the component with responder's list
  * And each reponder row click redirects to corresponding responses
 */
 @observer

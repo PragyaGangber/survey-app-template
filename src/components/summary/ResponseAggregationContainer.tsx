@@ -78,8 +78,6 @@ export class ResponseAggregationContainer extends React.Component<IResponseAggre
             for (var j = 0; j < question.options.length; j++) {
                 var option = question.options[j];
                 let optionCount = questionResultsData[option.name] || 0;
-                //TODO - color code for winner once css is finalized
-                // let maxSelectedOptionQuantity = ActionSDK.Utils.getMaxValue(ActionSDK.Utils.getValues(questionResultsData));
                 average = average + (parseInt(option.name)) * optionCount;
                 totalResponsesForQuestion = totalResponsesForQuestion + optionCount;
                 responsesAsBarChartItems.push({

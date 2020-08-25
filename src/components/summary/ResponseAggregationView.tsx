@@ -5,7 +5,6 @@ import { Flex, Text, Divider, Avatar, Loader, FlexItem } from "@fluentui/react-n
 import { RetryIcon, ChevronDownIcon } from '@fluentui/react-icons-northstar';
 import { goBack, fetchActionInstanceRows } from '../../actions/SummaryActions';
 import { RecyclerViewComponent, RecyclerViewType } from "./../RecyclerViewComponent";
-import { UserInfoView, IUserInfoViewProps} from './../UserInfoView';
 import {ProgressState} from './../../utils/SharedEnum';
 import {UxUtils} from './../../utils/UxUtils';
 import * as actionSDK from "@microsoft/m365-action-sdk";

@@ -36,6 +36,9 @@ import getStore, { Page } from '../store/creation/Store';
 import { QuestionDisplayType } from '../components/creation/questionContainer/QuestionDisplayType';
 import { SurveyUtils } from '../common/SurveyUtils';
 
+/**
+* This mutator function calls is to update the states to store the data for the current session
+*/
 mutator(setAppInitialized, (msg) => {
     const store = getStore();
     store.isInitialized = msg.state;
@@ -179,6 +182,11 @@ mutator(duplicateQuestion, (msg) => {
     store.questions = questions;
 })
 
+/**
+* This function gets the context as parameter and initialize the variables accordingly.
+* variable lastSessionData is Previous session data, if any.
+* This is applicable when the package view is relaunched (Edit scenario in preview screen before sending the survey).
+*/
 mutator(setContext, (msg) => {
     const store = getStore();
     store.context = msg.context;

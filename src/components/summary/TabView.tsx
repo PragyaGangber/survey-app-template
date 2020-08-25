@@ -14,7 +14,7 @@ import {Localizer} from '../../utils/Localizer';
 import { observer } from 'mobx-react';
 
 /**
- * This class creates the tabs for Responder's and NonResponder's list
+ * This components consist  of the adjacent tabs with  Responder's and NonResponder's list
  * ResponderView: Shows responder's list and each responder row redirects to response of corresponding user
  * NonResponderView: Shows non-responder's list
 */

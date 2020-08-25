@@ -6,13 +6,14 @@
         "build": "webpack --env.mode=pord --env.watch=false",
         "start": "webpack --env.mode=dev --env.watch=true",
         "zip": "cd ./output && bestzip ./ActionPackage.zip *",
-        "create": "npm run build && npm run zip && upload-action-package -z ./output/ActionPackage.zip -t ./output/ -e https://int.actions.office365.com",
-        "update": "npm run build && npm run zip && upload-action-package -z ./output/ActionPackage.zip -e https://int.actions.office365.com",
-        "inner-loop": "create-inner-loop -p <packageId> -d ./output -e https://int.actions.office365.com"
+        "create": "npm run build && npm run zip && upload-action-package -z ./output/ActionPackage.zip -t ./output/ -e https://edog.actions.office365.com",
+        "update": "npm run build && npm run zip && upload-action-package -z ./output/ActionPackage.zip -e https://edog.actions.office365.com",
+        "inner-loop": "create-inner-loop -p <packageId> -d ./output -e https://edog.actions.office365.com",
+        "lint": "tslint -c tslint.json -p tsconfig.json"
     },
     "dependencies": {
         "@fluentui/react-northstar": "^0.51.0",
-        "action-package-deploy": "^1.0.16",
+        "action-package-deploy": "^1.0.17",
         "@microsoft/m365-action-sdk": "https://static.actions.office365.com/sdk/v1.0.1/microsoft-m365-action-sdk.tgz",
         "babel-polyfill": "6.26.0",
         "bestzip": "^2.1.5",
@@ -41,6 +42,8 @@
         "node-sass": "4.12.0",
         "sass-loader": "7.1.0",
         "ts-loader": "5.4.5",
+        "tslint": "^6.1.3",
+        "tslint-microsoft-contrib": "^6.2.0",
         "typescript": "3.5.3",
         "webpack": "4.37.0",
         "webpack-cli": "3.2.3"

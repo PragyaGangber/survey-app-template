@@ -1,16 +1,16 @@
 {
-    "id": "com.microsoft.sampleapp.survey.papatne.1",
-    "name": "Survey(papatne INT React)",
-    "description": "Custom Survey(papatne-react)",
+    "id": "<packageId>",
+    "name": "Survey",
+    "description": "Create a Survey",
     "showLoadingIndicator": true,
-    "provider": {
-        "name": "Microsoft",
-        "websiteUrl": "https://www.microsoft.com/",
-        "privacyUrl": "https://www.microsoft.com/privacy",
-        "termsOfUseUrl": "https://www.microsoft.com/app-tos"
+    "developer": {
+        "name": "<name>",
+        "websiteUrl": "<websiteUrl>",
+        "privacyUrl": "<privacyUrl>",
+        "termsOfUseUrl": "<termsOfUseUrl>"
     },
     "icon": "images/appIcon.png",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "actionModel": "actionModel.json",
     "views": {
         "CardView": {
@@ -28,6 +28,21 @@
             "sourceLocation": "DetailView.html",
             "header": "Results view"
         }
+    },
+    "msTeamsProps": {
+        "name": {
+            "short": "Survey",
+            "full": "Survey"
+        },
+        "description": {
+            "short": "Collect data from your coworkers",
+            "full": "Ask a series of questions and get actionable insights by creating a survey in a chat or channel. Use Survey for – Registrations | Enrollments | Feedback | Testimonials | Lead Capture | Applications | Reporting | Complaints | Evaluations​. Find the app in \"…\" under the message compose box​. Name your survey and add questions. You're good to go. Stay on top of participation by tracking responses​. View survey results and download them to share with your co-workers"
+        },
+        "icons": {
+            "outline": "images/outline.png",
+            "color": "images/color.png"
+        },
+        "accentColor": "#4464ee"
     },
     "localizationInfo": {
         "defaultLocale": "en-us",

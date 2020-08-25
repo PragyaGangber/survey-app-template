@@ -1,5 +1,5 @@
 import { orchestrator } from "satcheljs";
-import { initialize, setActionInstance, sendResponse, setValidationModeOn, setAppInitialized, setSendingFlag, setCurrentView, setSavedActionInstanceRow, showResponseView, updateCurrentResponseIndex, setMyResponses, setResponseViewMode, setCurrentResponse, setContext, initializeNavBarButtons, setResponseSubmissionFailed, updateTopMostErrorIndex, setIsActionDeleted } from "../actions/ResponseActions";
+import { initialize, setActionInstance, sendResponse, setValidationModeOn, setAppInitialized, setSendingFlag, setCurrentView, setSavedActionInstanceRow, showResponseView, updateCurrentResponseIndex, setMyResponses, setResponseViewMode, setCurrentResponse, setContext, setResponseSubmissionFailed, updateTopMostErrorIndex, setIsActionDeleted } from "../actions/ResponseActions";
 import getStore, { ResponsePageViewType, ResponseViewMode } from "../store/response/Store";
 import { toJS } from "mobx";
 import * as actionSDK from "@microsoft/m365-action-sdk";

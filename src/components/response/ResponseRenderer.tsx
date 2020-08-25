@@ -1,11 +1,10 @@
 import * as React from 'react';
 import getStore, { ResponsePageViewType, ResponseViewMode } from "../../store/response/Store";
-import { sendResponse, resetResponse, setResponseViewMode, setCurrentView, setSavedActionInstanceRow, showResponseView, initializeNavBarButtons, setResponseSubmissionFailed } from '../../actions/ResponseActions';
+import { sendResponse, resetResponse, setResponseViewMode, setCurrentView, setSavedActionInstanceRow, showResponseView, setResponseSubmissionFailed } from '../../actions/ResponseActions';
 import { Flex, Button, Text } from '@fluentui/react-northstar';
 import { ChevronDownIcon, CloseIcon, ArrowDownIcon } from '@fluentui/react-icons-northstar';
 import ResponsePage from './ResponsePage';
 import { observer } from 'mobx-react';
-import * as actionSDK from '@microsoft/m365-action-sdk';
 import { MyResponsesListView } from '../myResponses/MyResponsesListView';
 import { UserResponseView } from "../summary/UserResponseView";
 import { initializeMyResponses } from "../../actions/MyResponsesActions";
@@ -94,7 +93,6 @@ export default class ResponseRenderer extends React.Component<any, any> {
                                         this.responsePageCancelButtonHandler();
                                     }} />
                                 }
-                                {/*Todo: @pragya fix this */}
                                 <ButtonComponent
                                     primary
                                     showLoader={getStore().isSendActionInProgress}

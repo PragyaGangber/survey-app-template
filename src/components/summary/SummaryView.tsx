@@ -5,7 +5,7 @@ import "../../scss/Summary.scss";
 import { closeSurvey, surveyCloseAlertOpen, updateDueDate, surveyExpiryChangeAlertOpen, setDueDate, surveyDeleteAlertOpen, deleteSurvey, setCurrentView, downloadCSV, setProgressStatus, setResponseViewType, showResponseView } from "../../actions/SummaryActions";
 import { BarChartComponent, IBarChartItem } from "./../BarChartComponent";
 import { Flex, Divider, Dialog, Loader, Text, Avatar, Button, ButtonProps,SplitButton } from "@fluentui/react-northstar";
-import { MoreIcon, ChevronDownIcon, CalendarIcon, BanIcon, TrashCanIcon } from '@fluentui/react-icons-northstar';
+import { MoreIcon, CalendarIcon, BanIcon, TrashCanIcon } from '@fluentui/react-icons-northstar';
 import * as actionSDK from "@microsoft/m365-action-sdk";
 import { ResponseAggregationContainer } from "./ResponseAggregationContainer";
 import * as html2canvas from "html2canvas";
@@ -21,7 +21,7 @@ import { Constants } from "./../../utils/Constants";
 import { DateTimePickerView } from "../DateTime";
 
 /**
- * This class creates the View user sees when View Result button is clicked
+ * This component renders the View user gets when View Result button is clicked
  * getHeaderContainer(): This fucntion consist of the component with survey title, due date and dialog box for change due date, close or delete the survey
  * getTopContainer(): This function consist of the components with participation percentage bar and link to open ResponderView/NonResponderView
  * getShortSummaryContainer(): This function consist of aggregate summary of per survey questions, each summary statement it will redirect you ResponseAggregationView.
@@ -285,9 +285,7 @@ export default class SummaryView extends React.Component<any, any> {
     }
 
     private downloadImage() {
-        // TODO find a better way than findDOMNode to get html element
         var bodyContainerDiv = document.getElementById("bodyContainer") as HTMLDivElement;
-        // TODO "default" is undefined, find proper resolution for this instead of "any".
         let backgroundColorOfResultsImage: string = UxUtils.getBackgroundColorForTheme(getStore().context.theme);
         (html2canvas as any)(bodyContainerDiv, { width: bodyContainerDiv.scrollWidth, height: bodyContainerDiv.scrollHeight, backgroundColor: backgroundColorOfResultsImage }).then((canvas) => {
             let fileName: string = Localizer.getString("SurveyResult", getStore().actionInstance.displayName).substring(0, Constants.ACTION_RESULT_FILE_NAME_MAX_LENGTH) + ".png";

@@ -98,15 +98,13 @@ export class InputBox extends React.Component<IInputBoxProps> {
     }
 
     private autoAdjustHeight() {
-        if (this.renderAs == RenderAs.TextArea) {
-            if(this.inputElement){
-                this.inputElement.style.height = '';
+        if (this.inputElement && (this.renderAs == RenderAs.TextArea)) {
+            this.inputElement.style.height = '';
 
-                if (this.bottomBorderWidth == -1) {
-                    this.bottomBorderWidth = parseFloat(getComputedStyle(this.inputElement).getPropertyValue('border-bottom-width'));
-                }
-                this.inputElement.style.height = this.inputElement.scrollHeight + this.bottomBorderWidth + 'px';
+            if (this.bottomBorderWidth == -1) {
+                this.bottomBorderWidth = parseFloat(getComputedStyle(this.inputElement).getPropertyValue('border-bottom-width'));
             }
+            this.inputElement.style.height = this.inputElement.scrollHeight + this.bottomBorderWidth + 'px';
         }
     }
 

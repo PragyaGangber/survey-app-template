@@ -27,12 +27,10 @@ interface ISurveyCreationStore {
     currentPage: Page;
     previousPage: Page;
     isSendActionInProgress: boolean;
-    // teamsGroups: actionSDK.TeamsGroup[];
     teamsGroupInitialized: InitializationState;
     draftActionInstanceId: string;
     openChannelPickerDialog: boolean;
     openSettingDialog: boolean;
-    // teamIdToTeamGroupMap: Map<string, actionSDK.TeamsGroup>;
     isSendSurveyAlertOpen: boolean;
     shouldFocusOnError: boolean;
 }
@@ -45,7 +43,6 @@ const store: ISurveyCreationStore = {
     settings: {
         resultVisibility: ResultVisibility.All,
         dueDate: Utils.getDefaultExpiry(7).getTime(),
-        // notificationSettings: new NotificationSettings(NotificationSettingMode.Daily, Constants.DEFAULT_DAILY_NOTIFICATION_TIME),
         isResponseEditable: true,
         isResponseAnonymous: false,
         // isMultiResponseAllowed: false,
@@ -58,12 +55,10 @@ const store: ISurveyCreationStore = {
     currentPage: Page.Main,
     previousPage: Page.Main,
     isSendActionInProgress: false,
-    // teamsGroups: new Array<actionSDK.TeamsGroup>(),
     teamsGroupInitialized: InitializationState.NotInitialized,
     draftActionInstanceId: "",
     openChannelPickerDialog: false,
     openSettingDialog: false,
-    // teamIdToTeamGroupMap: new Map<string, actionSDK.TeamsGroup>(),
     isSendSurveyAlertOpen: false,
     shouldFocusOnError: false
 }

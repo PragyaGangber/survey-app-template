@@ -21,7 +21,6 @@ enum SurveyResponseAction {
     updateCurrentResponseIndex = "updateCurrentResponseIndex",
     setMyResponses = "setMyResponses",
     setCurrentResponse = "setCurrentResponse",
-    initializeNavBarButtons = "initializeNavBarButtons",
     setResponseSubmissionFailed = "setResponseSubmissionFailed",
     updateTopMostErrorIndex = "updateTopMostErrorIndex",
     setIsActionDeleted = "setIsActionDeleted"
@@ -66,7 +65,7 @@ export let setMyResponses = action(SurveyResponseAction.setMyResponses, (actionI
 export let setCurrentResponse = action(SurveyResponseAction.setCurrentResponse, (response: actionSDK.ActionDataRow) => ({
     response: response
 }));
-export let initializeNavBarButtons = action(SurveyResponseAction.initializeNavBarButtons);
+
 export let setResponseSubmissionFailed = action(SurveyResponseAction.setResponseSubmissionFailed, (value: boolean) => ({
     value: value
 }));

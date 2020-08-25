@@ -53,8 +53,7 @@ const handleError = (error: actionSDK.ApiError, requestType: string) => {
 }
 
 /*
-* This function call is to fetch the data to be shown on ResultView.
-* It initializes all the variables for all the views in ResultView.
+* This Orchestrator function calls are to fetch data from APIs which will be presented in ResultView.
 * setContext(): set the context for the instance
 * fetchLocalization(): string localization
 * fetchActionInstance(): get action instance id

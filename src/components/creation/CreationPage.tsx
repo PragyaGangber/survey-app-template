@@ -19,7 +19,7 @@ import { ArrowDownIcon, AddIcon, BulletsIcon, FormatIcon, CallDialpadIcon, StarI
 import "./../../scss/Creation.scss";
 import { QuestionDisplayType } from "./questionContainer/QuestionDisplayType";
 import {
-    sendAction, addQuestion, updateSettings, updateTitle, previewAction, goToPage, initializeNavBarButtons, fetchCurrentContext,
+    sendAction, addQuestion, updateSettings, updateTitle, previewAction, goToPage, fetchCurrentContext,
     setSendSurveyAlertOpen, validateAndSend,setValidationMode, setPreviousPage
 } from "../../actions/CreationActions";
 import { observer } from "mobx-react";
@@ -109,9 +109,6 @@ export default class CreationPage extends React.Component<any, any> {
             return <Loader />;
         }
 
-        if (UxUtils.renderingForMobile()) {
-            initializeNavBarButtons();
-        }
         switch (getStore().currentPage) {
             case Page.Main:
                 return this.renderMainPage();
@@ -347,7 +344,10 @@ export default class CreationPage extends React.Component<any, any> {
                 goToPage(Page.Settings);
             }} />
     }
-
+    /**
+    * actionSDK.ActionDataColumnValueType.SingleOption is used for rating type as well as single select type
+    * actionSDK.ActionDataColumnValueType.MultiOption is used for Multiple select based questions
+    */
     private questionView(): JSX.Element {
         let showTitleError: boolean = getStore().isValidationModeOn && SurveyUtils.isEmptyOrNull(getStore().title);
         let questionMenuItems = [];

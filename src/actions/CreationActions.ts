@@ -26,7 +26,6 @@ export enum SurveyCreationAction {
     updateCustomProps = "updateCustomProps",
     setSendingFlag = "setSendingFlag",
     updateChoiceText = "updateChoiceText",
-    initializeNavBarButtons = "initializeNavBarButtons",
     showUpdateQuestionPage = "showUpdateQuestionPage",
     initializeExternal = "initializeExternal",
     setTeamsGroupInitializationState = "setTeamsGroupInitializationState",
@@ -44,7 +43,7 @@ export enum SurveyCreationAction {
 
 export let sendAction = action(SurveyCreationAction.sendAction);
 
-export let fetchCurrentContext = action("fetchCurrentContext");
+export let fetchCurrentContext = action(SurveyCreationAction.fetchCurrentContext);
 
 export let previewAction = action(SurveyCreationAction.previewAction);
 export let showPreview = action(SurveyCreationAction.showPreview, (showPreview: boolean) => ({ showPreview: showPreview }));
@@ -109,8 +108,6 @@ export let updateChoiceText = action(SurveyCreationAction.updateChoiceText, (tex
     choiceIndex: choiceIndex,
     questionIndex: questionIndex
 }));
-
-export let initializeNavBarButtons = action(SurveyCreationAction.initializeNavBarButtons);
 
 export let showUpdateQuestionPage = action(SurveyCreationAction.showUpdateQuestionPage, (questionIndex: number) => ({
     questionIndex: questionIndex

@@ -11,6 +11,9 @@
 .time-input-view-mob > input {
   font-size: 16px;
 }
+.time-input-view-mob {
+  max-width: 45vw;
+}
 
 .hidden-time-input-mob {
   -webkit-appearance: none;

@@ -17,7 +17,7 @@ export class ActionSdkHelper {
     public static async createActionInstance(action: actionSDK.Action) {
         try {
             let createRequest = new actionSDK.CreateAction.Request(action);
-            let createResponse = await  actionSDK.executeApi(createRequest) as  actionSDK.GetContext.Response;
+            await  actionSDK.executeApi(createRequest) as  actionSDK.GetContext.Response;
         }
         catch(error) {
             console.error("Error: " + JSON.stringify(error)); //Add error log

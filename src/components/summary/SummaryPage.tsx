@@ -20,7 +20,7 @@ import { AdaptiveMenu, AdaptiveMenuItem, AdaptiveMenuRenderStyle } from "./../Me
 import { ActionSdkHelper } from "../../helper/ActionSdkHelper";
 
 /**
- * This class creates the complete SummaryPage with different Views
+ * This component creates the  SummaryPage with different Views
  * SummaryView: first Page user sees when View Result button is clicked
  * TabView: Responder's and NonResponder's tab
  * ResponseAggregationView: Responses per question
