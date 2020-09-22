@@ -1,13 +1,16 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import { ChoiceContainer, IChoiceContainerOption, IChoiceContainerStrings } from "./../../ChoiceContainer";
-import './../../../scss/Creation.scss';
-import { Checkbox, Flex, Divider } from '@fluentui/react-northstar';
-import { CircleIcon } from '@fluentui/react-icons-northstar';
+import { ChoiceContainer, IChoiceContainerOption, IChoiceContainerStrings } from "../../ChoiceContainer";
+import "../Creation.scss";
+import { Checkbox, Flex, Divider } from "@fluentui/react-northstar";
+import { CircleIcon } from "@fluentui/react-icons-northstar";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 import { updateQuestion } from "../../../actions/CreationActions";
-import { SurveyUtils } from '../../../common/SurveyUtils';
-import { Localizer } from '../../../utils/Localizer';
-
+import { SurveyUtils } from "../../../utils/SurveyUtils";
+import { Localizer } from "../../../utils/Localizer";
+import { Constants } from "../../../utils/Constants";
 
 export interface IMCQComponentProps {
     question: actionSDK.ActionDataColumn;
@@ -28,7 +31,7 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
         super(props);
         this.state = {
             options: JSON.parse(JSON.stringify(this.props.question.options))
-        }
+        };
     }
 
     getOptions = () => {
@@ -41,7 +44,7 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
                 choicePrefix: choicePrefix,
                 choicePlaceholder: Localizer.getString("Choice", (i + 1)),
                 deleteChoiceLabel: Localizer.getString("DeleteChoiceX", i + 1)
-            }
+            };
             choiceOptions.push(choiceOption);
             i++;
         });
@@ -49,9 +52,9 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
     }
 
     generateOptionsErrorData(options: actionSDK.ActionDataColumnOption[]): string[] {
-        var optionsError: string[] = [];
-        if (options.length < 2) return optionsError;
-        for (var option of options) {
+        let optionsError: string[] = [];
+        if (options.length < 2) { return optionsError; }
+        for (let option of options) {
             if (SurveyUtils.isEmptyOrNull(option.displayName)) {
                 optionsError.push(Localizer.getString("Required"));
             } else {
@@ -68,7 +71,9 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
             updateQuestion(this.props.questionIndex, questionCopy);
         }
     }
-
+/**
+ * This function will render the MCQ choice containers with 2 options, user can add more options if needed
+*/
     render() {
         let choices = this.getOptions();
         let thisProps: IMCQComponentProps = {
@@ -87,7 +92,7 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
                 <ChoiceContainer
                     optionsError={optionsError}
                     strings={this.getStringsForChoiceComponent()}
-                    title=''
+                    title=""
                     options={choices}
                     onDeleteChoice={(i) => {
                         let optionsCopy: actionSDK.ActionDataColumnOption[] = [...this.state.options];
@@ -111,7 +116,7 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
                         let option: actionSDK.ActionDataColumnOption = {
                             name: thisProps.question.options.length.toString(),
                             displayName: ""
-                        }
+                        };
                         let optionsCopy: actionSDK.ActionDataColumnOption[] = [...this.state.options];
                         optionsCopy.push(option);
                         this.setState({
@@ -120,7 +125,8 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
                     }}
                     className="left-zero"
                     limit={10}
-                    inputClassName='invalid-error'
+                    maxLength={Constants.SURVEY_CHOICE_MAX_LENGTH}
+                    inputClassName="invalid-error"
                 />
                 <Divider className="question-divider" />
                 <Flex className="MCQ-setting" gap="gap.large">
@@ -129,6 +135,7 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
                         label={Localizer.getString("MultipleAnswers")}
                         checked={this.props.question.valueType === actionSDK.ActionDataColumnValueType.MultiOption}
                         onChange={(e, data) => {
+                            //checkbox to select if the question should be objective or multiple select
                             thisProps.question.valueType = data.checked ? actionSDK.ActionDataColumnValueType.MultiOption : actionSDK.ActionDataColumnValueType.SingleOption;
                             this.props.onChange(thisProps);
                         }} />
@@ -148,7 +155,7 @@ export class MCQComponent extends React.Component<IMCQComponentProps, IMCQCompon
     getStringsForChoiceComponent(): IChoiceContainerStrings {
         let choiceContainerStrings: IChoiceContainerStrings = {
             addChoice: Localizer.getString("AddChoice")
-        }
+        };
         return choiceContainerStrings;
     }
 }

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import "./BarChartComponent.scss";
 import { Flex, Text, FlexItem } from "@fluentui/react-northstar";
@@ -47,13 +50,13 @@ export class BarChartComponent extends React.PureComponent<IBarChartComponentPro
                 >
                     <ShimmerContainer lines={1} width={["50%"]} showShimmer={!!this.props.showShimmer}>
                         <Flex gap="gap.small" vAlign="center">
-                            <Text aria-hidden={true} content={item.title} size="medium" className={item.titleClassName} truncated />
+                            <Text aria-hidden={true} title={item.title} content={item.title} size="medium" className={item.titleClassName} truncated />
                             {!item.hideStatistics &&
                                 <>
                                     <FlexItem push>
                                         <Text aria-hidden={true} content={optionCount} size="small" weight="bold" />
                                     </FlexItem>
-                                    <Text aria-hidden={true} aria-label={percentageString} content={'(' + percentageString + ')'} size="small" />
+                                    <Text aria-hidden={true} aria-label={percentageString} content={"(" + percentageString + ")"} size="small" />
                                 </>}
                         </Flex>
                     </ShimmerContainer>

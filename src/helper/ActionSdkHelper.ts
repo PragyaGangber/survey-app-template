@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as actionSDK from "@microsoft/m365-action-sdk";
 
 export class ActionSdkHelper {
@@ -11,15 +14,14 @@ export class ActionSdkHelper {
         return response.strings;
     }
     /*
-    * @desc Service Request to create new Action Instance 
+    * @desc Service Request to create new Action Instance
     * @param {actionSDK.Action} action instance which need to get created
     */
     public static async createActionInstance(action: actionSDK.Action) {
         try {
             let createRequest = new actionSDK.CreateAction.Request(action);
-            await  actionSDK.executeApi(createRequest) as  actionSDK.GetContext.Response;
-        }
-        catch(error) {
+            await  actionSDK.executeApi(createRequest);
+        } catch(error) {
             console.error("Error: " + JSON.stringify(error)); //Add error log
         }
     }
@@ -31,8 +33,7 @@ export class ActionSdkHelper {
         try {
             let response = await actionSDK.executeApi(new actionSDK.GetContext.Request()) as actionSDK.GetContext.Response;
             return response;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: GetContext() "+ error);
         }
     }
@@ -45,10 +46,10 @@ export class ActionSdkHelper {
         try {
             let getActionRequest = new actionSDK.GetAction.Request(actionId);
             let response = await actionSDK.executeApi(getActionRequest) as actionSDK.GetAction.Response;
-            return response;
-        }
-        catch(error) {
+            return {success: true, actionInstance: response};
+        } catch(error) {
             console.log("Error: getActionInstance() "+ error);
+            return {success: false, error: error};
         }
     }
     /*
@@ -61,8 +62,7 @@ export class ActionSdkHelper {
             let getSummaryRequest = new actionSDK.GetActionDataRowsSummary.Request(actionId, true);
             let response = await actionSDK.executeApi(getSummaryRequest) as actionSDK.GetActionDataRowsSummary.Response;
             return response;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: getActionSummary() "+ error);
         }
     }
@@ -80,8 +80,7 @@ export class ActionSdkHelper {
             let getDataRowsRequest = new actionSDK.GetActionDataRows.Request(context.actionId, creatorId, continuationToken, pageSize, dataTableName);
             let response = await actionSDK.executeApi(getDataRowsRequest) as actionSDK.GetActionDataRows.Response;
             return response;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: getActionDataRows() "+ error);
         }
     }
@@ -95,8 +94,7 @@ export class ActionSdkHelper {
             let getSubscriptionCount = new actionSDK.GetSubscriptionMemberCount.Request(subscription);
             let response = await actionSDK.executeApi(getSubscriptionCount) as actionSDK.GetSubscriptionMemberCount.Response;
             return response;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: getMemberCount() "+ error);
         }
     }
@@ -107,12 +105,11 @@ export class ActionSdkHelper {
     *   @return responseResponders: {id, error, success, memberIdsNotFound, members}
     */
     public static async getResponderDetails(subscription: actionSDK.Subscription, userIds: string[]) {
-        try{
+        try {
             let requestResponders = new actionSDK.GetSubscriptionMembers.Request(subscription, userIds);
             let responseResponders = await actionSDK.executeApi(requestResponders) as actionSDK.GetSubscriptionMembers.Response;
             return responseResponders;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: getResponderDetails() "+ error);
         }
     }
@@ -128,8 +125,7 @@ export class ActionSdkHelper {
             let requestNonResponders = new actionSDK.GetActionSubscriptionNonParticipants.Request(actionId, subscriptionId);
             let responseNonResponders = await actionSDK.executeApi(requestNonResponders) as actionSDK.GetActionSubscriptionNonParticipants.Response;
             return  responseNonResponders;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: getNonResponders() "+ error);
         }
     }
@@ -140,15 +136,14 @@ export class ActionSdkHelper {
     *   @return response: {id, error, success}
     */
     public static async deleteActionInstance(actionId) {
-        try{
+        try {
             let request = new actionSDK.DeleteAction.Request(actionId);
             let response = await actionSDK.executeApi(request) as actionSDK.DeleteAction.Response;
             return response;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: deleteActionInstance() "+ error);
         }
-            
+
     }
 
     /*
@@ -157,16 +152,15 @@ export class ActionSdkHelper {
     *   @param fileName : name of the CSV file
     *   @return downloadResponse: {id, error, success}
     */
-    public static async downloadResponseAsCSV(actionId: string, fileName: string){
+    public static async downloadResponseAsCSV(actionId: string, fileName: string) {
         try {
             let downloadCSVRequest = new actionSDK.DownloadActionDataRowsResult.Request(
                 actionId,
                 fileName
             );
-            let downloadResponse = await actionSDK.executeApi(downloadCSVRequest) as actionSDK.DownloadActionDataRowsResult.Response
+            let downloadResponse = await actionSDK.executeApi(downloadCSVRequest) as actionSDK.DownloadActionDataRowsResult.Response;
             return downloadResponse;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: downloadResponseAsCSV() "+ error);
         }
     }
@@ -176,13 +170,12 @@ export class ActionSdkHelper {
     *   @param updateInfo: object contains the new status for instance, like new due date or survey closed
     *   @return updateActionResponse: {id, error, success}
     */
-    public static async updateActionInstanceStatus(updateInfo){
-        try{
+    public static async updateActionInstanceStatus(updateInfo) {
+        try {
             let updateActionRequest = new actionSDK.UpdateAction.Request(updateInfo);
             let updateActionResponse = await actionSDK.executeApi(updateActionRequest) as actionSDK.UpdateAction.Response;
-            return updateActionResponse
-        }
-        catch(error) {
+            return updateActionResponse;
+        } catch(error) {
             console.log("Error: updateActionInstanceStatus() "+ error);
         }
     }
@@ -190,12 +183,11 @@ export class ActionSdkHelper {
     /*
     *   @desc Service API to close the adaptive card opened
     */
-    public static async closeCardView(){
+    public static async closeCardView() {
         try {
             let closeViewRequest = new actionSDK.CloseView.Request();
-            await actionSDK.executeApi(closeViewRequest) as actionSDK.CloseView.Response;
-        }
-        catch(error) {
+            await actionSDK.executeApi(closeViewRequest);
+        } catch(error) {
             console.log("Error: closeCardView() "+ error);
         }
     }
@@ -206,7 +198,7 @@ export class ActionSdkHelper {
     *   2. Add the new response row for the action instance if multiple responses are allowed
     *   3. Update response row if the user has already participated and single response allowed
     */
-    public static async addOrUpdateDataRows(addRows, updateRows){
+    public static async addOrUpdateDataRows(addRows, updateRows) {
         try {
             let addOrUpdateRowsRequest = new actionSDK.AddOrUpdateActionDataRows.Request(
                 addRows,
@@ -214,8 +206,7 @@ export class ActionSdkHelper {
             );
             let addOrUpdateResponse = await actionSDK.executeApi(addOrUpdateRowsRequest) as actionSDK.AddOrUpdateActionDataRows.Response;
             return addOrUpdateResponse;
-        }
-        catch(error) {
+        } catch(error) {
             console.log("Error: addOrUpdateDataRows() "+ error);
         }
     }
@@ -223,7 +214,7 @@ export class ActionSdkHelper {
     /*
     *   @desc Service API to hide the loader when the data load is successful to show the page or if failed then to show the error
     */
-    public static async hideLoadIndicator(){
+    public static async hideLoadIndicator() {
         await actionSDK.executeApi(new actionSDK.HideLoadingIndicator.Request());
     }
 }

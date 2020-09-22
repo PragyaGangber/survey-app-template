@@ -1,10 +1,12 @@
-import * as React from 'react';
-import { QuestionView, IMultiChoiceProps } from './QuestionView';
-import { RadioGroup } from '@fluentui/react-northstar';
-import { CircleIcon } from '@fluentui/react-icons-northstar';
-import * as actionSDK from "@microsoft/m365-action-sdk";
-import '../../../scss/Response.scss';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+import * as React from "react";
+import { QuestionView, IMultiChoiceProps } from "./QuestionView";
+import { RadioGroup } from "@fluentui/react-northstar";
+import { CircleIcon } from "@fluentui/react-icons-northstar";
+import * as actionSDK from "@microsoft/m365-action-sdk";
+import "../Response.scss";
 
 export class SingleSelectView extends React.Component<IMultiChoiceProps> {
 
@@ -34,17 +36,16 @@ export class SingleSelectView extends React.Component<IMultiChoiceProps> {
                 key: options[i].name,
                 label: options[i].displayName,
                 value: options[i].name,
-                icon: <CircleIcon 
-                    size="medium" 
-                    aria-disabled={!this.props.editable} 
-                    className={(this.props.response == i && !this.props.editable) ? 'icon-disabled' : ''} />,
+                icon: <CircleIcon
+                    size="medium"
+                    aria-disabled={!this.props.editable}
+                    className={(this.props.response == i && !this.props.editable) ? "icon-disabled" : ""} />,
                 disabled: !this.props.editable && !this.props.isPreview,
-                'aria-disabled': !this.props.editable,
+                "aria-disabled": !this.props.editable,
                 className: i !== options.length - 1 ? "single-select options-space" : "single-select",
                 tabIndex: this.props.editable ? 0 : -1,
                 role: "radio"
             });
-
 
         }
 

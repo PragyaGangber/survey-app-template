@@ -1,7 +1,10 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { action } from "satcheljs";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { InitializationState } from './../utils/SharedEnum';
-import { ResponsePageViewType, ResponseViewMode } from "../store/response/Store";
+import { ProgressState } from "./../utils/SharedEnum";
+import { ResponsePageViewType, ResponseViewMode } from "../store/ResponseStore";
 
 enum SurveyResponseAction {
     initialize = "initialize",
@@ -40,7 +43,7 @@ export let initializeExternal = action(SurveyResponseAction.initializeExternal, 
     actionInstanceRow: actionInstanceRow
 }));
 export let setValidationModeOn = action(SurveyResponseAction.setValidationModeOn);
-export let setAppInitialized = action(SurveyResponseAction.setAppInitialized, (state: InitializationState) => ({ state: state }));
+export let setAppInitialized = action(SurveyResponseAction.setAppInitialized, (state: ProgressState) => ({ state: state }));
 export let resetResponse = action(SurveyResponseAction.resetResponse);
 export let setResponseViewMode = action(SurveyResponseAction.setResponseViewMode, (responseViewMode: ResponseViewMode) => ({
     responseState: responseViewMode

@@ -1,24 +1,27 @@
-import * as React from 'react';
-import * as actionSDK from '@microsoft/m365-action-sdk';
-import { ResponseViewMode } from '../../store/response/Store';
-import { SurveyUtils } from '../../common/SurveyUtils';
-import { QuestionDisplayType } from '../creation/questionContainer/QuestionDisplayType';
-import { IRatingAnswerProps, IQuestionProps, IMultiChoiceProps } from './questionView/QuestionView';
-import { ScaleRatingAnswerView } from './questionView/ScaleRatingAnswerView';
-import { StarRatingAnswerView } from './questionView/StarRatingAnswerView';
-import { Text } from '@fluentui/react-northstar';
-import { DateOnlyAnswerView } from './questionView/DateOnlyAnswerView';
-import { NumericAnswerView } from './questionView/NumericAnswerView';
-import { TextAnswerView } from './questionView/TextAnswerView';
-import { MultiSelectView } from './questionView/MultiSelectView';
-import { SingleSelectView } from './questionView/SingleSelectView';
-import { LikeToggleRatingAnswerView } from './questionView/LikeToggleAnswerView';
-import './../../scss/Response.scss';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import * as actionSDK from "@microsoft/m365-action-sdk";
+import { ResponseViewMode } from "../../store/ResponseStore";
+import { SurveyUtils } from "../../utils/SurveyUtils";
+import { QuestionDisplayType } from "../Creation/questionContainer/QuestionDisplayType";
+import { IRatingAnswerProps, IQuestionProps, IMultiChoiceProps } from "./questionView/QuestionView";
+import { ScaleRatingAnswerView } from "./questionView/ScaleRatingAnswerView";
+import { StarRatingAnswerView } from "./questionView/StarRatingAnswerView";
+import { Text } from "@fluentui/react-northstar";
+import { DateOnlyAnswerView } from "./questionView/DateOnlyAnswerView";
+import { NumericAnswerView } from "./questionView/NumericAnswerView";
+import { TextAnswerView } from "./questionView/TextAnswerView";
+import { MultiSelectView } from "./questionView/MultiSelectView";
+import { SingleSelectView } from "./questionView/SingleSelectView";
+import { LikeToggleRatingAnswerView } from "./questionView/LikeToggleAnswerView";
+import "./Response.scss";
 import * as ReactDOM from "react-dom";
-import { updateTopMostErrorIndex } from '../../actions/ResponseActions';
-import {Localizer} from '../../utils/Localizer';
-import {UxUtils} from './../../utils/UxUtils';
-import {Constants} from './../../utils/Constants';
+import { updateTopMostErrorIndex } from "../../actions/ResponseActions";
+import { Localizer } from "../../utils/Localizer";
+import { UxUtils } from "./../../utils/UxUtils";
+import { Constants } from "./../../utils/Constants";
 import { ActionSdkHelper } from "../../helper/ActionSdkHelper";
 
 export interface IResponseView {
@@ -82,7 +85,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                                     response: this.props.response,
                                     updateResponse: this.props.callback,
                                     isPreview: isPreview
-                                }
+                                };
                                 return <ScaleRatingAnswerView {...scaleRatingAnswerViewProps} />;
 
                             case QuestionDisplayType.TenStar:
@@ -96,7 +99,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                                     response: this.props.response,
                                     updateResponse: this.props.callback,
                                     isPreview: isPreview
-                                }
+                                };
                                 return <StarRatingAnswerView {...starRatingAnswerViewProps} />;
 
                             case QuestionDisplayType.LikeDislike:
@@ -108,7 +111,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                                     response: this.props.response,
                                     updateResponse: this.props.callback,
                                     isPreview: isPreview
-                                }
+                                };
                                 return <LikeToggleRatingAnswerView {...likeToggleAnswerViewProps} />;
 
                             default:
@@ -121,7 +124,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                                     response: this.props.response,
                                     updateResponse: this.props.callback,
                                     isPreview: isPreview
-                                }
+                                };
                                 return <SingleSelectView {...singleSelectProps} />;
                         }
 
@@ -137,7 +140,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                             response: this.props.response,
                             updateResponse: this.props.callback,
                             isPreview: isPreview
-                        }
+                        };
                         return <MultiSelectView {...multiSelectProps} />;
 
                     case actionSDK.ActionDataColumnValueType.Text:
@@ -149,7 +152,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                             response: this.props.response,
                             updateResponse: this.props.callback,
                             isPreview: isPreview
-                        }
+                        };
                         return <TextAnswerView {...textAnswerProps} />;
 
                     case actionSDK.ActionDataColumnValueType.Numeric:
@@ -161,7 +164,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                             response: this.props.response,
                             updateResponse: this.props.callback,
                             isPreview: isPreview
-                        }
+                        };
                         return <NumericAnswerView {...numAnswerProps} />;
 
                     case actionSDK.ActionDataColumnValueType.Date:
@@ -174,7 +177,7 @@ export default class ResponseView extends React.Component<IResponseView, any> {
                             updateResponse: this.props.callback,
                             isPreview: isPreview,
                             locale: this.props.locale
-                        }
+                        };
                         return <DateOnlyAnswerView {...dateAnswerProps} />;
 
                     default:

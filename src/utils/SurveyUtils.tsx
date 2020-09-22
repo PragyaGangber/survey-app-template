@@ -1,10 +1,13 @@
-import { QuestionDisplayType } from "../components/creation/questionContainer/QuestionDisplayType";
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { QuestionDisplayType } from "../components/Creation/questionContainer/QuestionDisplayType";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { UxUtils } from '../utils/UxUtils';
-import { Utils } from '../utils/Utils';
+import { UxUtils } from "./UxUtils";
+import { Utils } from "./Utils";
 import { ButtonProps } from "@fluentui/react-northstar";
-import { Localizer } from "../utils/Localizer";
-import { ActionSdkHelper } from "../helper/ActionSdkHelper"
+import { Localizer } from "./Localizer";
+import { ActionSdkHelper } from "../helper/ActionSdkHelper";
 
 /**
 * This namespace contains all the generic functions used in survey app
@@ -20,8 +23,9 @@ export namespace SurveyUtils {
     * @return true/false: boolean
     */
     export let isQuestionValid = (question: actionSDK.ActionDataColumn) => {
-        if ((!question) || isEmptyOrNull(question.displayName))
+        if ((!question) || isEmptyOrNull(question.displayName)) {
             return false;
+        }
         if (question.valueType == actionSDK.ActionDataColumnValueType.SingleOption
             || question.valueType == actionSDK.ActionDataColumnValueType.MultiOption) {
 
@@ -35,7 +39,7 @@ export namespace SurveyUtils {
             }
         }
         return true;
-    }
+    };
 
     /**
     * Checks if the provided parameter is empty or null
@@ -43,10 +47,11 @@ export namespace SurveyUtils {
     * @return true/false: boolean
     */
     export let isEmptyOrNull = (value: string) => {
-        if (!value || value.trim().length === 0)
+        if (!value || value.trim().length === 0) {
             return true;
+        }
         return false;
-    }
+    };
 
     /**
     * Rating questions are converted and stored as MCQ type questions
@@ -63,7 +68,7 @@ export namespace SurveyUtils {
             ratingType == QuestionDisplayType.TenStar) {
             maxRatings = 10;
         }
-        for (var i = 1; i <= maxRatings; i++) {
+        for (let i = 1; i <= maxRatings; i++) {
             let option = {
                 name: i.toString(),
                 displayName: i.toString()
@@ -77,7 +82,7 @@ export namespace SurveyUtils {
             options[1].displayName = "Dislike";
         }
         return options;
-    }
+    };
 
     /**
     * It fetches the response for the survey of logged-in user
@@ -87,32 +92,25 @@ export namespace SurveyUtils {
     * @param continuationToken: string
     * @return  Promise<actionSDK.ActionDataRow[]>(async(resolve, reject): resolve when call is successfull and have result, and reject for errors
     */
-    export function fetchMyResponses(context: actionSDK.ActionSdkContext, pageSize: number = 100, rows: actionSDK.ActionDataRow[] = [], continuationToken: string = null): Promise<actionSDK.ActionDataRow[]> {
-        return new Promise<actionSDK.ActionDataRow[]>(async(resolve, reject) => {
-            try{
-                let datarowsCall = await ActionSdkHelper.getActionDataRows(context, "self", continuationToken, pageSize, null);
-                if(datarowsCall.success){
-                    rows = datarowsCall.dataRows;
-                    if (datarowsCall.continuationToken) {
-                        fetchMyResponses(context, pageSize, rows, datarowsCall.continuationToken)
-                            .then((response) => { resolve(response); })
-                            .catch((error) => { reject(error); });
-                    }
-                    else {
-                        resolve(rows);
-                    }
+    export async function fetchMyResponses(context: actionSDK.ActionSdkContext, pageSize: number = 100, rows: actionSDK.ActionDataRow[] = [], continuationToken: string = null) {
+        try {
+            let datarowsCall = await ActionSdkHelper.getActionDataRows(context, "self", continuationToken, pageSize, null);
+            if(datarowsCall.success) {
+                rows = datarowsCall.dataRows;
+                if (datarowsCall.continuationToken) {
+                    let response = fetchMyResponses(context, pageSize, rows, datarowsCall.continuationToken);
+                    return response;
+                } else {
+                    return {success: true, rows: rows};
                 }
-                else {
-                    reject(datarowsCall.error);
-                }
+            } else {
+                return {success: false, error: datarowsCall.error};
             }
-            catch(error) {
-                reject(error);
-                console.error("Error: " + JSON.stringify(error)); //Add error log
-            }
-        });
+        } catch (error) {
+            console.error("Error: " + JSON.stringify(error));
+            return {success: false, error: error};
+        }
     }
-
 
     /**
     * This is a check to validate whether all questions are optional
@@ -185,10 +183,11 @@ export namespace SurveyUtils {
     export function isValidResponse(response: any, isOptional: boolean, columnType: actionSDK.ActionDataColumnValueType): boolean {
         switch (columnType) {
             case actionSDK.ActionDataColumnValueType.MultiOption:
-                return isOptional || (!Utils.isEmptyObject(response) && JSON.parse(response).length > 0)
+                return isOptional || (!Utils.isEmptyObject(response) && JSON.parse(response).length > 0);
             case actionSDK.ActionDataColumnValueType.Numeric:
-                if (isInvalidNumericPattern(response))
+                if (isInvalidNumericPattern(response)) {
                     return false;
+                }
                 return isOptional || !Utils.isEmptyObject(response);
             default:
                 return isOptional || !Utils.isEmptyObject(response);
@@ -207,7 +206,7 @@ export namespace SurveyUtils {
     export function getDialogButtonProps(dialogDescription: string, buttonLabel: string): ButtonProps {
         let buttonProps: ButtonProps = {
             "content": buttonLabel
-        }
+        };
 
         if (UxUtils.renderingForMobile()) {
             Object.assign(buttonProps, {

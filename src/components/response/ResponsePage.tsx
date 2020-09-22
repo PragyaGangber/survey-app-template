@@ -1,13 +1,16 @@
-import * as React from 'react';
-import getStore, { ResponseViewMode } from "../../store/response/Store";
-import { Flex, Text } from '@fluentui/react-northstar';
-import './../../scss/Response.scss';
-import { observer } from 'mobx-react';
-import { updateResponse } from '../../actions/ResponseActions';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import getStore, { ResponseViewMode } from "../../store/ResponseStore";
+import { Flex, Text } from "@fluentui/react-northstar";
+import "./Response.scss";
+import { observer } from "mobx-react";
+import { updateResponse } from "../../actions/ResponseActions";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import ResponseView from './ResponseView';
-import {Localizer} from '../../utils/Localizer';
-import {UxUtils} from './../../utils/UxUtils';
+import ResponseView from "./ResponseView";
+import { Localizer } from "../../utils/Localizer";
+import { UxUtils } from "./../../utils/UxUtils";
 import { ActionSdkHelper } from "../../helper/ActionSdkHelper";
 
 export interface IResponsePage {
@@ -21,7 +24,7 @@ export default class ResponsePage extends React.Component<IResponsePage, any> {
     render() {
         ActionSdkHelper.hideLoadIndicator();
         return (
-            <Flex gap='gap.smaller' column>
+            <Flex gap="gap.smaller" column>
                 {UxUtils.renderingForMobile() &&
                     getStore().responseSubmissionFailed &&
                     <Text content={Localizer.getString("ResponseSubmitError")}
@@ -33,7 +36,6 @@ export default class ResponsePage extends React.Component<IResponsePage, any> {
             </Flex>
         );
     }
-
 
     private questionView(): JSX.Element {
         let questionsView: JSX.Element[] = [];
@@ -53,6 +55,6 @@ export default class ResponsePage extends React.Component<IResponsePage, any> {
             />);
             questionsView.push(<div className="bottom-space">{questionView}</div>);
         });
-        return <Flex column>{questionsView}</Flex>
+        return <Flex column>{questionsView}</Flex>;
     }
 }

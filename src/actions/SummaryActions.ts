@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { action } from "satcheljs";
-import { SummaryPageViewType, SummaryProgressStatus, ResponsesListViewType, QuestionDrillDownInfo } from "../store/summary/Store";
+import { SummaryPageViewType, SummaryProgressStatus, ResponsesListViewType, QuestionDrillDownInfo } from "../store/SummaryStore";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 
 enum SurveySummaryAction {
@@ -23,7 +26,6 @@ enum SurveySummaryAction {
     goBack = "goBack",
     fetchActionInstance = "fetchActionInstance",
     fetchUserDetails = "fetchUserDetails",
-    fetchUserProfilePic = "fetchUserProfilePic",
     actionInstanceSummary = "actionInstanceSummary",
     fetchActionInstanceRows = "fetchActionInstanceRows",
     fetchNonResponders = "fetchNonResponders",
@@ -49,10 +51,6 @@ export let setContext = action(SurveySummaryAction.setContext, (context: actionS
 }));
 
 export let fetchUserDetails = action(SurveySummaryAction.fetchUserDetails, (userIds: string[]) => ({
-    userIds: userIds
-}));
-
-export let fetchUserProfilePic = action(SurveySummaryAction.fetchUserProfilePic, (userIds: string[]) => ({
     userIds: userIds
 }));
 
@@ -157,7 +155,7 @@ export let setResponseViewType = action(SurveySummaryAction.setResponseViewType,
 
 export let setSelectedQuestionDrillDownInfo = action(SurveySummaryAction.setSelectedQuestionDrillDownInfo, (questionDrillDownInfo: QuestionDrillDownInfo) => ({
     questionDrillDownInfo: questionDrillDownInfo
-}))
+}));
 
 export let setIsActionDeleted = action(SurveySummaryAction.setIsActionDeleted, (isActionDeleted: boolean) => ({
     isActionDeleted: isActionDeleted

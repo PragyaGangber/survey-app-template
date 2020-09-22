@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as uuid from "uuid";
 
 export namespace Utils {
@@ -27,7 +30,7 @@ export namespace Utils {
             return true;
         }
 
-        var isEmpty = false;
+        let isEmpty = false;
 
         if (typeof obj === "number" || typeof obj === "boolean") {
             isEmpty = false;
@@ -44,39 +47,16 @@ export namespace Utils {
     }
 
     export function getTimeRemaining(deadLineDate: Date): {} {
-        var now = new Date().getTime();
-        var deadLineTime = deadLineDate.getTime();
-
-        var minutes: number = 0;
-        var hours: number = 0;
-        var days: number = 0;
-        var weeks: number = 0;
-        var months: number = 0;
-        var years: number = 0;
-
-        var diff = Math.abs(deadLineTime - now);
-        if (diff > 0) {
-            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-            var days = Math.floor(
-                (diff % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24)
-            );
-            var weeks = Math.floor(
-                (diff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24 * 7)
-            );
-            var months = Math.floor(
-                (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)
-            );
-            var years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
-        }
+        let now = new Date().getTime();
+        let deadLineTime = deadLineDate.getTime();
+        let diff = Math.abs(deadLineTime - now);
         return {
-            YEARS: years,
-            MONTHS: months,
-            WEEKS: weeks,
-            DAYS: days,
-            HOURS: hours,
-            MINUTES: minutes,
+            [Utils.MINUTES] : Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+            [Utils.HOURS]   : Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            [Utils.DAYS]    : Math.floor((diff % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24)),
+            [Utils.WEEKS]   : Math.floor((diff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24 * 7)),
+            [Utils.MONTHS]  : Math.floor((diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)),
+            [Utils.YEARS]   : Math.floor(diff / (1000 * 60 * 60 * 24 * 365))
         };
     }
 
@@ -100,7 +80,7 @@ export namespace Utils {
 
     export function getMaxValue(values: number[]): number {
         let result = Number.MIN_VALUE;
-        for (var i = 0; i < values.length; i++) {
+        for (let i = 0; i < values.length; i++) {
             result = Math.max(result, values[i]);
         }
         return result;
@@ -108,7 +88,7 @@ export namespace Utils {
 
     export function downloadContent(fileName: string, data: string) {
         if (data && fileName) {
-            var a = document.createElement("a");
+            let a = document.createElement("a");
             a.href = data;
             a.download = fileName;
             document.body.appendChild(a);

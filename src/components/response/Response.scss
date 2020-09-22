@@ -1,4 +1,4 @@
-@import './../scss/common.scss';
+@import '../../scss/common.scss';
 
 .response-container {
   @include resolve-dir(padding-left, 24px);
@@ -54,6 +54,31 @@
   padding: 0px !important;
   cursor: default !important;
   word-break: break-all;
+  display: grid !important;
+  justify-content: flex-start;
+  grid-template-columns: 20px auto !important;
+  align-items: baseline !important;
+  .theme-default & {
+    color: #252423;
+  }
+  .theme-dark & {
+    color: #c8c6c4;
+  }
+  .theme-contrast & {
+    color: #fff;
+  }
+}
+
+.single-select:hover {
+  .theme-default & {
+    color: #252423;
+  }
+  .theme-dark & {
+    color: #c8c6c4;
+  }
+  .theme-contrast & {
+    color: #fff;
+  }
 }
 
 .bottom-space {
@@ -64,8 +89,19 @@
   padding: 0px !important;
   word-break: break-all;
   border-color: black;
-  display: flex !important;
+  display: grid !important;
   justify-content: flex-start;
+  grid-template-columns: 20px auto !important;
+  grid-gap: 1px;
+  .theme-default & {
+    color: #252423;
+  }
+  .theme-dark & {
+    color: #c8c6c4;
+  }
+  .theme-contrast & {
+    color: #fff;
+  }
 }
 
 .response-block {

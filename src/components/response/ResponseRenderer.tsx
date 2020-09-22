@@ -1,22 +1,23 @@
-import * as React from 'react';
-import getStore, { ResponsePageViewType, ResponseViewMode } from "../../store/response/Store";
-import { sendResponse, resetResponse, setResponseViewMode, setCurrentView, setSavedActionInstanceRow, showResponseView, setResponseSubmissionFailed } from '../../actions/ResponseActions';
-import { Flex, Button, Text } from '@fluentui/react-northstar';
-import { ChevronDownIcon, CloseIcon, ArrowDownIcon } from '@fluentui/react-icons-northstar';
-import ResponsePage from './ResponsePage';
-import { observer } from 'mobx-react';
-import { MyResponsesListView } from '../myResponses/MyResponsesListView';
-import { UserResponseView } from "../summary/UserResponseView";
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import getStore, { ResponsePageViewType, ResponseViewMode } from "../../store/ResponseStore";
+import { sendResponse, resetResponse, setResponseViewMode, setCurrentView, setSavedActionInstanceRow, showResponseView, setResponseSubmissionFailed } from "../../actions/ResponseActions";
+import { Flex, Button, Text } from "@fluentui/react-northstar";
+import { ChevronStartIcon } from "@fluentui/react-icons-northstar";
+import ResponsePage from "./ResponsePage";
+import { observer } from "mobx-react";
+import { MyResponsesListView } from "../MyResponses/MyResponsesListView";
+import { UserResponseView } from "../Summary/UserResponseView";
 import { initializeMyResponses } from "../../actions/MyResponsesActions";
-import "../../scss/Response.scss";
-import {Localizer} from  "../../utils/Localizer";
-import { Utils } from '../../utils/Utils';
-import {UxUtils} from './../../utils/UxUtils';
-import { InitializationState} from './../../utils/SharedEnum';
-import {NavBarComponent, INavBarComponentProps, NavBarItemType} from './../NavBarComponent';
-import {ErrorView } from './../ErrorView';
-import {ButtonComponent } from './../Button';
-import {LoaderUI } from './../Loader';
+import "./Response.scss";
+import { Localizer } from  "../../utils/Localizer";
+import { Utils } from "../../utils/Utils";
+import { UxUtils } from "./../../utils/UxUtils";
+import { ProgressState } from "./../../utils/SharedEnum";
+import { ErrorView } from "./../ErrorView";
+import { LoaderUI } from "./../Loader";
 import { ActionSdkHelper } from "../../helper/ActionSdkHelper";
 
 @observer
@@ -31,11 +32,10 @@ export default class ResponseRenderer extends React.Component<any, any> {
             />;
         }
 
-        if (getStore().isInitialized === InitializationState.NotInitialized) {
+        if (getStore().isInitialized === ProgressState.NotStarted) {
             return <LoaderUI fill />;
-        }
-        else if (getStore().isInitialized === InitializationState.Failed) {
-            
+        } else if (getStore().isInitialized === ProgressState.Failed) {
+
             return <ErrorView
                 title={Localizer.getString("GenericError")}
                 buttonTitle={Localizer.getString("Close")}
@@ -56,12 +56,12 @@ export default class ResponseRenderer extends React.Component<any, any> {
                         <Flex vAlign="center" className="pointer-cursor" {...UxUtils.getTabKeyProps()} onClick={() => {
                             this.myResponsesViewBackButtonHandler();
                         }} >
-                            <ChevronDownIcon rotate={90} xSpacing="after" size="small" />
+                            <ChevronStartIcon xSpacing="after" size="small" />
                             <Text content={Localizer.getString("Back")} />
                         </Flex>
                     </Flex>
                 </>
-            )
+            );
         } else if (getStore().currentView === ResponsePageViewType.SelectedResponseView) {
             return this.renderUserResponseView();
         }
@@ -81,8 +81,8 @@ export default class ResponseRenderer extends React.Component<any, any> {
                     <Flex.Item push>
                         {getStore().responseViewMode === ResponseViewMode.DisabledResponse ?
                             <Button content={Localizer.getString("EditResponse")} primary onClick={() => {
-                                /* 
-                                Any update to this handler should also be made in the NAV_BAR_MENUITEM_EDIT_RESPONSE_ID  
+                                /*
+                                Any update to this handler should also be made in the NAV_BAR_MENUITEM_EDIT_RESPONSE_ID
                                 section in navBarMenuCallback() in ResponseOrchestrator
                                 */
                                 setResponseViewMode(ResponseViewMode.UpdateResponse);
@@ -93,18 +93,19 @@ export default class ResponseRenderer extends React.Component<any, any> {
                                         this.responsePageCancelButtonHandler();
                                     }} />
                                 }
-                                <ButtonComponent
+                                <Button
                                     primary
-                                    showLoader={getStore().isSendActionInProgress}
+                                    loading={getStore().isSendActionInProgress}
+                                    disabled={getStore().isSendActionInProgress}
                                     content={getStore().responseViewMode === ResponseViewMode.UpdateResponse ? Localizer.getString("UpdateResponse") : Localizer.getString("SubmitResponse")}
                                     onClick={() => {
-                                        /* 
-                                        Any update to this handler should also be made in the NAV_BAR_MENUITEM_SUBMIT_RESPONSE_ID  
+                                        /*
+                                        Any update to this handler should also be made in the NAV_BAR_MENUITEM_SUBMIT_RESPONSE_ID
                                         section in navBarMenuCallback() in ResponseOrchestrator
                                         */
                                         sendResponse();
                                     }}>
-                                </ButtonComponent>
+                                </Button>
                             </Flex>
                         }
                     </Flex.Item>
@@ -165,47 +166,6 @@ export default class ResponseRenderer extends React.Component<any, any> {
         );
     }
 
-    private getMobileContainerClassName() {
-        let className = "body-container";
-        if (!this.shouldShowFooterOnMobile()) {
-            className += " no-mobile-footer";
-        }
-        return className;
-    }
-
-    private getNavBar() {
-        let navBarComponentProps: INavBarComponentProps;
-        if (getStore().responseViewMode === ResponseViewMode.UpdateResponse) {
-            navBarComponentProps = {
-                title: Localizer.getString("Cancel"),
-                leftNavBarItem: {
-                    icon: <CloseIcon outline={true} size="large" />,
-                    ariaLabel: Localizer.getString("Cancel"),
-                    onClick: () => {
-                        this.responsePageCancelButtonHandler();
-                    },
-                    type: NavBarItemType.BACK
-                }
-            };
-        } else if (getStore().currentView === ResponsePageViewType.MyResponses) {
-            navBarComponentProps = {
-                title: Localizer.getString("Back"),
-                leftNavBarItem: {
-                    icon: <ArrowDownIcon size="large" rotate={90} />,
-                    ariaLabel: Localizer.getString("Back"),
-                    onClick: () => {
-                        this.myResponsesViewBackButtonHandler();
-                    },
-                    type: NavBarItemType.BACK
-                }
-            };
-        }
-
-        return (
-            <NavBarComponent {...navBarComponentProps} />
-        );
-    }
-
     private myResponsesViewBackButtonHandler() {
         resetResponse();
         setCurrentView(ResponsePageViewType.Main);
@@ -215,16 +175,5 @@ export default class ResponseRenderer extends React.Component<any, any> {
         setResponseSubmissionFailed(false);
         resetResponse();
         setResponseViewMode(ResponseViewMode.DisabledResponse);
-    }
-
-    private shouldShowFooterOnMobile(): boolean {
-        return getStore().actionInstance.dataTables[0].canUserAddMultipleRows && getStore().myResponses.length > 0 &&
-            getStore().currentView !== ResponsePageViewType.MyResponses &&
-            getStore().currentView !== ResponsePageViewType.SelectedResponseView;
-    }
-
-    private shouldShowNavBar(): boolean {
-        return getStore().responseViewMode === ResponseViewMode.UpdateResponse ||
-            getStore().currentView === ResponsePageViewType.MyResponses;
     }
 }

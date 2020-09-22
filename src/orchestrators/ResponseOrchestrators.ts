@@ -1,79 +1,68 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { orchestrator } from "satcheljs";
-import { initialize, setActionInstance, sendResponse, setValidationModeOn, setAppInitialized, setSendingFlag, setCurrentView, setSavedActionInstanceRow, showResponseView, updateCurrentResponseIndex, setMyResponses, setResponseViewMode, setCurrentResponse, setContext, setResponseSubmissionFailed, updateTopMostErrorIndex, setIsActionDeleted } from "../actions/ResponseActions";
-import getStore, { ResponsePageViewType, ResponseViewMode } from "../store/response/Store";
+import { initialize, setActionInstance, sendResponse, setValidationModeOn, setAppInitialized, setSendingFlag, setCurrentView, setSavedActionInstanceRow, showResponseView, updateCurrentResponseIndex, setMyResponses, setResponseViewMode, setCurrentResponse, setContext, setResponseSubmissionFailed, updateTopMostErrorIndex } from "../actions/ResponseActions";
+import getStore, { ResponsePageViewType, ResponseViewMode } from "../store/ResponseStore";
 import { toJS } from "mobx";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { InitializationState } from "./../utils/SharedEnum";
-import { SurveyUtils } from '../common/SurveyUtils';
-import {Localizer} from '../utils/Localizer';
-import {ActionUtils} from './../utils/ActionUtils';
+import { ProgressState } from "./../utils/SharedEnum";
+import { SurveyUtils } from "../utils/SurveyUtils";
+import { Localizer } from "../utils/Localizer";
+import { ActionModelHelper } from "../helper/ActionModelHelper";
 import { Utils } from "../utils/Utils";
-import { ActionSdkHelper } from "../helper/ActionSdkHelper"
+import { ActionSdkHelper } from "../helper/ActionSdkHelper";
 
-orchestrator(initialize, async() => {
-    try{
+orchestrator(initialize, async () => {
+    try {
         let response = await ActionSdkHelper.getContext();
-        if(response.success) {
+        if (response.success) {
             setContext(response.context);
-            Promise.all([
-            Localizer.initialize(),
-            fetchActionInstanceNow(),
-            fetchMyResponsesNow(),
-            ])
-            .then((results) => {
+            let localizer = await Localizer.initialize();
+            let actionRows = await fetchActionInstanceNow();
+            let myResponse = await fetchMyResponsesNow();
+
+            if (localizer && actionRows.success && myResponse.success) {
                 if (!getStore().actionInstance.dataTables[0].canUserAddMultipleRows && getStore().myResponses.length > 0) {
                     setCurrentResponse(getStore().myResponses[0]);
                     setResponseViewMode(ResponseViewMode.DisabledResponse);
                 }
                 setSavedActionInstanceRow(toJS(getStore().response.row));
-                setAppInitialized(InitializationState.Initialized);
-            })
-            .catch((error) => {
-                setAppInitialized(InitializationState.Failed);
-            });
-        }
-        else {
-            setAppInitialized(InitializationState.Failed);
-        }
-    }
-    catch(error) {
-        setAppInitialized(InitializationState.Failed);
-    }
-  });
+                setAppInitialized(ProgressState.Completed);
+            } else {
+                setAppInitialized(ProgressState.Failed);
 
+            }
+        } else {
+            setAppInitialized(ProgressState.Failed);
+        }
+    } catch (error) {
+        setAppInitialized(ProgressState.Failed);
+    }
+});
 
-function fetchActionInstanceNow(): Promise<boolean> {
-    return new Promise<boolean>(async(resolve, reject) => {
-        try{
-            let response = await ActionSdkHelper.getActionInstance(getStore().context.actionId);
-            if(response.success) {
-                setActionInstance(response.action);
-                resolve(true);
-            }
-            else {
-                reject(response.error);
-            }
-        }
-        catch(error) {
-            reject(error);
-        }
-    });
-}
-  
-function fetchMyResponsesNow(): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-        SurveyUtils.fetchMyResponses(getStore().context)
-            .then((rows) => {
-                setMyResponses(rows);
-                resolve(true);
-            })
-            .catch(error => {
-                reject(error)
-            });
-    });
+async function fetchActionInstanceNow() {
+    let response = await ActionSdkHelper.getActionInstance(getStore().context.actionId);
+    if (response.success && response.actionInstance.success) {
+        setActionInstance(response.actionInstance.action);
+        return { success: true };
+    } else {
+        return { success: false };
+    }
 }
 
-orchestrator(sendResponse, async() => {
+async function fetchMyResponsesNow() {
+    let response = await SurveyUtils.fetchMyResponses(getStore().context);
+    if (response.success) {
+        setMyResponses(response.rows);
+        return { success: true };
+    } else {
+        return response;
+    }
+
+}
+
+orchestrator(sendResponse, async () => {
     setValidationModeOn();
     if (getStore().actionInstance && getStore().actionInstance.dataTables[0].dataColumns.length > 0) {
         let columns = toJS(getStore().actionInstance.dataTables[0].dataColumns);
@@ -88,7 +77,11 @@ orchestrator(sendResponse, async() => {
                 return;
             }
         }
-
+        if (Utils.isEmptyObject(row)) {
+            row = {
+                0: null
+            };
+        }
         let actionInstanceRow: actionSDK.ActionDataRow = {
             id: getStore().response.id ? getStore().response.id : "",
             actionId: getStore().context.actionId,
@@ -102,12 +95,11 @@ orchestrator(sendResponse, async() => {
         setSendingFlag(true);
         setResponseSubmissionFailed(false);
         Utils.announceText(Localizer.getString("SubmittingResponse"));
-        ActionUtils.prepareActionInstanceRow(actionInstanceRow);
+        ActionModelHelper.prepareActionInstanceRow(actionInstanceRow);
 
-        if(getStore().actionInstance.dataTables[0].canUserAddMultipleRows || ! getStore().response.id ){
+        if (getStore().actionInstance.dataTables[0].canUserAddMultipleRows || !getStore().response.id) {
             addRows.push(actionInstanceRow);
-        }
-        else{
+        } else {
             updateRows.push(actionInstanceRow);
         }
         try {
@@ -116,14 +108,12 @@ orchestrator(sendResponse, async() => {
             if (addOrUpdate.success) {
                 Utils.announceText(Localizer.getString("Submitted"));
                 await ActionSdkHelper.closeCardView();
-            } 
-            else {
+            } else {
                 setResponseSubmissionFailed(true);
                 setSendingFlag(false);
                 Utils.announceText(Localizer.getString("Failed"));
             }
-        }
-        catch(error) {
+        } catch (error) {
             setResponseSubmissionFailed(true);
             setSendingFlag(false);
             Utils.announceText(Localizer.getString("SubmissionFailed"));
@@ -141,4 +131,3 @@ orchestrator(showResponseView, (msg) => {
         setCurrentView(ResponsePageViewType.SelectedResponseView);
     }
 });
-

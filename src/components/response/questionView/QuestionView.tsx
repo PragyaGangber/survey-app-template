@@ -1,22 +1,25 @@
-import * as React from 'react';
-import { Text, Flex } from '@fluentui/react-northstar';
-import '../../../scss/Response.scss';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import { Text, Flex } from "@fluentui/react-northstar";
+import "../Response.scss";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import {UxUtils} from './../../../utils/UxUtils';
-import {Localizer} from "../../../utils/Localizer";
+import { UxUtils } from "./../../../utils/UxUtils";
+import { Localizer } from "../../../utils/Localizer";
 
 export interface IRatingAnswerProps extends IQuestionProps {
     count: number;
 }
 
 export interface IMultiChoiceProps extends IQuestionProps {
-    options: actionSDK.ActionDataColumnOption[]
+    options: actionSDK.ActionDataColumnOption[];
 }
 
 export interface IQuestionProps {
     questionNumber: number;
     questionText: string;
-    required?: boolean
+    required?: boolean;
     editable?: boolean;
     response?: any;
     isPreview?: boolean;
@@ -26,26 +29,10 @@ export interface IQuestionProps {
 
 export class QuestionView extends React.Component<IQuestionProps> {
 
-    private getQuestionText = () => {
-        if (this.props.questionText) {
-            return this.props.questionText;
-        }
-        return Localizer.getString("QuestionTitlePlaceHolder");
-    }
-
-    //Adding this prop to stop announcing 2 times on android phone
-    private getAccessibilityProps = () => {
-        if (UxUtils.renderingForAndroid()) {
-            return {
-                role: "group"
-            }
-        }
-    }
-
     render() {
         let className = "question-view-title break-word";
         return (
-            <Flex gap='gap.small' {...this.getAccessibilityProps()}>
+            <Flex gap="gap.small" {...this.getAccessibilityProps()}>
                 <Flex className="question-number-text">
                     <Text content={this.props.questionNumber + ". "} className="question-view-title" />
                 </Flex>
@@ -59,6 +46,22 @@ export class QuestionView extends React.Component<IQuestionProps> {
                     {this.props.children}
                 </Flex>
             </Flex>
-        )
+        );
+    }
+
+    private getQuestionText = () => {
+        if (this.props.questionText) {
+            return this.props.questionText;
+        }
+        return Localizer.getString("QuestionTitlePlaceHolder");
+    }
+
+    //Adding this prop to stop announcing 2 times on android phone
+    private getAccessibilityProps = () => {
+        if (UxUtils.renderingForAndroid()) {
+            return {
+                role: "group"
+            };
+        }
     }
 }

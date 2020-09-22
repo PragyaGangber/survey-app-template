@@ -1,9 +1,12 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import { Flex, Box, Text } from "@fluentui/react-northstar";
-import './Rating.scss';
-import { UxUtils } from '../../utils/UxUtils';
+import "./Rating.scss";
+import { UxUtils } from "../../utils/UxUtils";
 import { Utils } from "../../utils/Utils";
-import { Localizer } from '../../utils/Localizer';
+import { Localizer } from "../../utils/Localizer";
 
 export interface IScaleRatingViewProps {
     max: number;
@@ -22,20 +25,20 @@ export class ScaleRatingView extends React.PureComponent<IScaleRatingViewProps, 
     static getDerivedStateFromProps(props, state) {
         return {
             value: props.defaultValue
-        }
+        };
     }
 
     constructor(props: IScaleRatingViewProps) {
         super(props);
         this.state = {
             value: props.defaultValue
-        }
+        };
     }
 
     render() {
         let items: JSX.Element[] = [];
         for (let i = 1; i <= this.props.max; i++) {
-            let className = this.state.value < i ? 'rating-number-unfilled' : 'rating-number-filled';
+            let className = this.state.value < i ? "rating-number-unfilled" : "rating-number-filled";
             className = (this.props.disabled && this.state.value >= i) ? className + " disabled-rating" : className;
             if (!this.props.isPreview && !this.props.disabled) {
                 className = className + " pointer-cursor";

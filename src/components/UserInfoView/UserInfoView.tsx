@@ -1,6 +1,9 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import { Flex, FlexItem, Text, Avatar, Divider, ChevronDownMediumIcon } from "@fluentui/react-northstar";
-import './UserInfoView.scss';
+import { Flex, FlexItem, Text, Avatar, Divider, ChevronEndMediumIcon } from "@fluentui/react-northstar";
+import "./UserInfoView.scss";
 import { UxUtils } from "./../../utils/UxUtils";
 
 export interface IUserInfoViewProps {
@@ -29,7 +32,7 @@ export class UserInfoView extends React.PureComponent<IUserInfoViewProps> {
                         <Text className="nowrap date-grey" size="small">{this.props.date}</Text>
                     </FlexItem>}
                     {this.props.onClick &&
-                        <ChevronDownMediumIcon size="smallest" rotate={270} outline />
+                        <ChevronEndMediumIcon size="smallest" outline />
                     }
                 </Flex>
                 {this.props.showBelowDivider ? <Divider /> : null}

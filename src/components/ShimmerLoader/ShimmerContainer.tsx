@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import './Shimmer.scss';
+import "./Shimmer.scss";
 import { ShimmerLoader, IShimmerLoaderProps } from "./ShimmerLoader";
 
 /**

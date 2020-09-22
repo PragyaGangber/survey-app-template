@@ -1,16 +1,19 @@
-import * as React from 'react';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
 
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { INavBarComponentProps, NavBarItemType, NavBarComponent } from './../NavBarComponent';
-import { goToPage, updateQuestion, deleteQuestion } from '../../actions/CreationActions';
-import getStore, { Page } from '../../store/creation/Store';
-import { Flex, Text, Divider, Button } from '@fluentui/react-northstar';
-import { TrashCanIcon } from '@fluentui/react-icons-northstar';
-import { observer } from 'mobx-react';
-import { SurveyUtils } from '../../common/SurveyUtils';
-import QuestionComponent, { IQuestionComponentProps } from './questionContainer/QuestionComponent';
-import { toJS } from 'mobx';
-import { Localizer } from '../../utils/Localizer';
+import { INavBarComponentProps, NavBarItemType, NavBarComponent } from "../NavBarComponent";
+import { goToPage, updateQuestion, deleteQuestion } from "../../actions/CreationActions";
+import getStore, { Page } from "../../store/CreationStore";
+import { Flex, Text, Divider, Button } from "@fluentui/react-northstar";
+import { TrashCanIcon } from "@fluentui/react-icons-northstar";
+import { observer } from "mobx-react";
+import { SurveyUtils } from "../../utils/SurveyUtils";
+import QuestionComponent, { IQuestionComponentProps } from "./questionContainer/QuestionComponent";
+import { toJS } from "mobx";
+import { Localizer } from "../../utils/Localizer";
 
 @observer
 export class UpdateQuestionPage extends React.Component<any> {
@@ -63,9 +66,8 @@ export class UpdateQuestionPage extends React.Component<any> {
     private getQuestionSection() {
         let question: actionSDK.ActionDataColumn = toJS(getStore().questions[this.questionIndex]);
 
-
         return (
-            <div key={"question" + this.questionIndex} className={(getStore().isValidationModeOn && !SurveyUtils.isQuestionValid(question) ? 'question-box invalid' : 'question-box')}>
+            <div key={"question" + this.questionIndex} className={(getStore().isValidationModeOn && !SurveyUtils.isQuestionValid(question) ? "question-box invalid" : "question-box")}>
                 <QuestionComponent
                     isValidationModeOn={getStore().isValidationModeOn}
                     onChange={(props: IQuestionComponentProps) => {

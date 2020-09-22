@@ -1,9 +1,12 @@
-import './../../../scss/Creation.scss';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import "../Creation.scss";
 import { UxUtils } from "../../../utils/UxUtils";
-import { Flex } from '@fluentui/react-northstar';
-import { CanvasAddPageIcon, TrashCanIcon, ArrowUpIcon, ArrowDownIcon } from '@fluentui/react-icons-northstar';
+import { Flex } from "@fluentui/react-northstar";
+import { CanvasAddPageIcon, TrashCanIcon, ArrowUpIcon, ArrowDownIcon } from "@fluentui/react-icons-northstar";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import * as React from 'react';
+import * as React from "react";
 import {
     deleteQuestion,
     duplicateQuestion,
@@ -11,14 +14,13 @@ import {
     moveQuestionUp,
     updateActiveQuestionIndex,
     updateQuestion,
-} from '../../../actions/CreationActions';
-import { SurveyUtils } from '../../../common/SurveyUtils';
-import QuestionComponent, { IQuestionComponentProps } from './QuestionComponent';
-import { ResponseViewMode } from '../../../store/response/Store';
-import ResponseView from '../../response/ResponseView';
-import { Utils } from '../../../utils/Utils';
+} from "../../../actions/CreationActions";
+import { SurveyUtils } from "../../../utils/SurveyUtils";
+import QuestionComponent, { IQuestionComponentProps } from "./QuestionComponent";
+import { ResponseViewMode } from "../../../store/ResponseStore";
+import ResponseView from "../../Response/ResponseView";
+import { Utils } from "../../../utils/Utils";
 import { Localizer } from "../../../utils/Localizer";
-
 
 export interface IQuestionContainerProps {
     questions: actionSDK.ActionDataColumn[];
@@ -33,7 +35,7 @@ export class QuestionContainer extends React.Component<IQuestionContainerProps> 
     private isQuestionTitleBoxClicked = false;
 
     shouldComponentUpdate(props: any, nextState: any) {
-        //should focus on title only when question title box is clicked and active question index is changed 
+        //should focus on title only when question title box is clicked and active question index is changed
         //or a new question is added
         if (this.props.activeQuestionIndex !== props.activeQuestionIndex && this.isQuestionTitleBoxClicked
             || this.props.questions.length < props.questions.length) {
@@ -45,11 +47,30 @@ export class QuestionContainer extends React.Component<IQuestionContainerProps> 
         return true;
     }
 
+    render() {
+        const questions: actionSDK.ActionDataColumn[] = this.props.questions;
+        let questionsView: JSX.Element[] = [];
+        for (let i = 0; i < questions.length; i++) {
+            let question: actionSDK.ActionDataColumn = { ...questions[i] };
+            if (i === this.props.activeQuestionIndex) {
+                questionsView.push(this.getContentView(i, question));
+            } else {
+                questionsView.push(this.getTitleContentView(i, question));
+            }
+        }
+
+        return (
+            <Flex column>
+                {questionsView}
+            </Flex>
+        );
+    }
+
     private getTitleContentView(index: number, question: actionSDK.ActionDataColumn): JSX.Element {
         let questionPreview: JSX.Element = (
             <div
                 key={"question" + index}
-                className={(this.props.isValidationModeOn && !SurveyUtils.isQuestionValid(question) ? 'questionPaneTitle invalid' : 'questionPaneTitle')}
+                className={(this.props.isValidationModeOn && !SurveyUtils.isQuestionValid(question) ? "questionPaneTitle invalid" : "questionPaneTitle")}
                 {...UxUtils.getListItemProps()}
                 onClick={(e) => {
                     this.isQuestionTitleBoxClicked = true;
@@ -66,7 +87,7 @@ export class QuestionContainer extends React.Component<IQuestionContainerProps> 
 
     private getContentView(index: number, question: actionSDK.ActionDataColumn) {
         return (
-            <div key={"question" + index} className={(this.props.isValidationModeOn && !SurveyUtils.isQuestionValid(question) ? 'question-box invalid' : 'question-box')}>
+            <div key={"question" + index} className={(this.props.isValidationModeOn && !SurveyUtils.isQuestionValid(question) ? "question-box invalid" : "question-box")}>
                 <div className="question-controls">
                     <CanvasAddPageIcon
                         {...UxUtils.getTabKeyProps()}
@@ -127,25 +148,6 @@ export class QuestionContainer extends React.Component<IQuestionContainerProps> 
                     renderForMobile={false}
                 />
             </div>
-        );
-    }
-
-    render() {
-        const questions: actionSDK.ActionDataColumn[] = this.props.questions;
-        let questionsView: JSX.Element[] = [];
-        for (let i = 0; i < questions.length; i++) {
-            let question: actionSDK.ActionDataColumn = { ...questions[i] };
-            if (i === this.props.activeQuestionIndex) {
-                questionsView.push(this.getContentView(i, question));
-            } else {
-                questionsView.push(this.getTitleContentView(i, question));
-            }
-        }
-
-        return (
-            <Flex column>
-                {questionsView}
-            </Flex>
         );
     }
 }

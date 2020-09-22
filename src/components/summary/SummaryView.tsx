@@ -1,20 +1,22 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import { observer } from "mobx-react";
-import getStore, { SummaryPageViewType, ResponsesListViewType } from "../../store/summary/Store";
-import "../../scss/Summary.scss";
+import getStore, { SummaryPageViewType, ResponsesListViewType } from "../../store/SummaryStore";
+import "./Summary.scss";
 import { closeSurvey, surveyCloseAlertOpen, updateDueDate, surveyExpiryChangeAlertOpen, setDueDate, surveyDeleteAlertOpen, deleteSurvey, setCurrentView, downloadCSV, setProgressStatus, setResponseViewType, showResponseView } from "../../actions/SummaryActions";
 import { BarChartComponent, IBarChartItem } from "./../BarChartComponent";
-import { Flex, Divider, Dialog, Loader, Text, Avatar, Button, ButtonProps,SplitButton } from "@fluentui/react-northstar";
-import { MoreIcon, CalendarIcon, BanIcon, TrashCanIcon } from '@fluentui/react-icons-northstar';
+import { Flex, Divider, Dialog, Loader, Text, Avatar, ButtonProps, SplitButton } from "@fluentui/react-northstar";
+import { MoreIcon, CalendarIcon, BanIcon, TrashCanIcon } from "@fluentui/react-icons-northstar";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 import { ResponseAggregationContainer } from "./ResponseAggregationContainer";
 import * as html2canvas from "html2canvas";
-import { IButtonProps } from "./../Button/ButtonComponent";
-import { SurveyUtils } from "../../common/SurveyUtils";
+import { SurveyUtils } from "../../utils/SurveyUtils";
 import { Localizer } from "../../utils/Localizer";
 import { Utils } from "../../utils/Utils";
-import { ProgressState } from './../../utils/SharedEnum';
-import { ErrorView } from './../ErrorView';
+import { ProgressState } from "./../../utils/SharedEnum";
+import { ErrorView } from "./../ErrorView";
 import { AdaptiveMenu, AdaptiveMenuItem, AdaptiveMenuRenderStyle } from "./../Menu";
 import { UxUtils } from "./../../utils/UxUtils";
 import { Constants } from "./../../utils/Constants";
@@ -39,7 +41,7 @@ export default class SummaryView extends React.Component<any, any> {
     render() {
         return (
             <>
-                <Flex column className={getStore().inPersonalAppMode ? "personal-app-body" : "body-container no-mobile-footer"} ref={this.bodyContainer} id="bodyContainer">
+                <Flex column className={"body-container no-mobile-footer"} ref={this.bodyContainer} id="bodyContainer">
                     {this.getHeaderContainer()}
                     {this.getTopContainer()}
                     {this.getMyResponseContainer()}
@@ -51,11 +53,58 @@ export default class SummaryView extends React.Component<any, any> {
 
     }
 
+    getMenuItems(): AdaptiveMenuItem[] {
+        let menuItemList: AdaptiveMenuItem[] = [];
+        if (this.isCurrentUserCreator() && this.isSurveyActive()) {
+            let changeExpiry: AdaptiveMenuItem = {
+                key: "changeDueDate",
+                content: Localizer.getString("ChangeDueBy"),
+                icon: <CalendarIcon outline={true} />,
+                onClick: () => {
+                    if (getStore().progressStatus.updateActionInstance != ProgressState.InProgress) {
+                        setProgressStatus({ updateActionInstance: ProgressState.NotStarted });
+                    }
+                    surveyExpiryChangeAlertOpen(true);
+                }
+            };
+            menuItemList.push(changeExpiry);
+
+            let closeSurvey: AdaptiveMenuItem = {
+                key: "close",
+                content: Localizer.getString("CloseSurvey"),
+                icon: <BanIcon outline={true} />,
+                onClick: () => {
+                    if (getStore().progressStatus.deleteActionInstance != ProgressState.InProgress) {
+                        setProgressStatus({ closeActionInstance: ProgressState.NotStarted });
+                    }
+                    surveyCloseAlertOpen(true);
+                }
+            };
+            menuItemList.push(closeSurvey);
+        }
+
+        if (this.isCurrentUserCreator()) {
+            let deleteSurvey: AdaptiveMenuItem = {
+                key: "delete",
+                content: Localizer.getString("DeleteSurvey"),
+                icon: <TrashCanIcon outline={true} />,
+                onClick: () => {
+                    if (getStore().progressStatus.deleteActionInstance != ProgressState.InProgress) {
+                        setProgressStatus({ deleteActionInstance: ProgressState.NotStarted });
+                    }
+                    surveyDeleteAlertOpen(true);
+                }
+            };
+            menuItemList.push(deleteSurvey);
+        }
+        return menuItemList;
+    }
+
     private getMyResponseContainer(): JSX.Element {
-        var myResponseCount = getStore().myRows.length;
-        var myProfilePhoto: string;
-        var myUserName = Localizer.getString("You");
-        var currentUserProfile: actionSDK.SubscriptionMember = getStore().userProfile[getStore().context.userId];
+        let myResponseCount = getStore().myRows.length;
+        let myProfilePhoto: string;
+        let myUserName = Localizer.getString("You");
+        let currentUserProfile: actionSDK.SubscriptionMember = getStore().userProfile[getStore().context.userId];
         if (currentUserProfile && currentUserProfile.displayName) {
             myUserName = currentUserProfile.displayName;
         }
@@ -63,7 +112,7 @@ export default class SummaryView extends React.Component<any, any> {
             myProfilePhoto = currentUserProfile.profilePhotoUrl;
         }
         if (myResponseCount > 0) {
-            var content = Localizer.getString("YouRespondedNTimes", myResponseCount);
+            let content = Localizer.getString("YouRespondedNTimes", myResponseCount);
             if (myResponseCount == 1 && getStore().myRows[0].columnValues) {
                 content = Localizer.getString("YouResponded");
             }
@@ -86,7 +135,7 @@ export default class SummaryView extends React.Component<any, any> {
                     </Flex>
                     <Divider data-html2canvas-ignore="true" />
                 </>
-            )
+            );
         } else {
             return (<>
                 <Flex data-html2canvas-ignore="true" className="my-response" gap="gap.small" vAlign="center">
@@ -124,11 +173,11 @@ export default class SummaryView extends React.Component<any, any> {
             && getStore().progressStatus.memberCount == ProgressState.Completed
             && getStore().progressStatus.actionSummary == ProgressState.Completed) {
 
-            var participationString: string = getStore().actionSummary.rowCount === 1 ?
+            let participationString: string = getStore().actionSummary.rowCount === 1 ?
                 Localizer.getString("ParticipationIndicatorSingular", getStore().actionSummary.rowCount, getStore().memberCount)
                 : Localizer.getString("ParticipationIndicatorPlural", getStore().actionSummary.rowCount, getStore().memberCount);
 
-            var participationIndicator: JSX.Element;
+            let participationIndicator: JSX.Element;
             if (getStore().actionInstance && getStore().actionInstance.dataTables[0].canUserAddMultipleRows) {
                 participationString = (getStore().actionSummary.rowCount === 0)
                     ? Localizer.getString("NoResponse")
@@ -137,8 +186,8 @@ export default class SummaryView extends React.Component<any, any> {
                         : Localizer.getString("XResponsesByYMembers", getStore().actionSummary.rowCount, (getStore().actionSummary.rowCreatorCount));
                 participationIndicator = null;
             } else {
-                var participationInfoItems: IBarChartItem[] = [];
-                var participationPercentage = Math.round((getStore().actionSummary.rowCount / getStore().memberCount) * 100);
+                let participationInfoItems: IBarChartItem[] = [];
+                let participationPercentage = Math.round((getStore().actionSummary.rowCount / getStore().memberCount) * 100);
                 participationInfoItems.push({
                     id: "participation",
                     title: Localizer.getString("Participation", participationPercentage),
@@ -152,7 +201,6 @@ export default class SummaryView extends React.Component<any, any> {
                     }}
                     totalQuantity={getStore().memberCount} />;
             }
-
 
             return (
                 <>
@@ -168,6 +216,7 @@ export default class SummaryView extends React.Component<any, any> {
                             }
                         </Flex.Item>
                     </Flex>
+                    <Divider />
                 </>
             );
         } else if (getStore().progressStatus.memberCount == ProgressState.Failed
@@ -190,7 +239,7 @@ export default class SummaryView extends React.Component<any, any> {
         }
 
         if (getStore().actionInstance.status == actionSDK.ActionStatus.Closed) {
-            var expiry: number = getStore().actionInstance.updateTime ? getStore().actionInstance.updateTime : getStore().actionInstance.expiryTime;
+            let expiry: number = getStore().actionInstance.updateTime ? getStore().actionInstance.updateTime : getStore().actionInstance.expiryTime;
             return Localizer.getString("ClosedOn",
                 UxUtils.formatDate(new Date(expiry),
                     (getStore().context && getStore().context.locale) ? getStore().context.locale : Utils.DEFAULT_LOCALE, options));
@@ -208,10 +257,9 @@ export default class SummaryView extends React.Component<any, any> {
         return (
             <Flex column className="summary-header-container" >
                 <Flex vAlign="center" className="title-and-menu-container">
-                    <Text content={getStore().actionInstance.displayName} className="questionnaire-title" />
-                    {getStore().inPersonalAppMode ? null : this.getMenu()}
+                    <Text className="expiry-status" content={this.getActionInstanceStatusString()} />
+                    {this.getMenu()}
                 </Flex>
-                <Text className="expiry-status" content={this.getActionInstanceStatusString()} />
                 <Divider className="due-by-label-divider" />
                 {this.setupDeleteDialog()}
                 {this.setupCloseDialog()}
@@ -261,7 +309,7 @@ export default class SummaryView extends React.Component<any, any> {
                     }}
 
                     primary
-                    toggleButton={{ 'aria-label': 'more-options' }}
+                    toggleButton={{ "aria-label": "more-options" }}
                     onMainButtonClick={() => this.downloadImage()}
                 />
             </Flex>
@@ -274,18 +322,18 @@ export default class SummaryView extends React.Component<any, any> {
             className: "break-word",
             content: <Text content={Localizer.getString(menuLabel)} />,
             onClick: () => {
-                if (key == 'download_image') {
+                if (key == "download_image") {
                     this.downloadImage();
-                } else if (key == 'download_responses') {
+                } else if (key == "download_responses") {
                     downloadCSV();
                 }
             }
-        }
+        };
         return menuItem;
     }
 
     private downloadImage() {
-        var bodyContainerDiv = document.getElementById("bodyContainer") as HTMLDivElement;
+        let bodyContainerDiv = document.getElementById("bodyContainer") as HTMLDivElement;
         let backgroundColorOfResultsImage: string = UxUtils.getBackgroundColorForTheme(getStore().context.theme);
         (html2canvas as any)(bodyContainerDiv, { width: bodyContainerDiv.scrollWidth, height: bodyContainerDiv.scrollHeight, backgroundColor: backgroundColorOfResultsImage }).then((canvas) => {
             let fileName: string = Localizer.getString("SurveyResult", getStore().actionInstance.displayName).substring(0, Constants.ACTION_RESULT_FILE_NAME_MAX_LENGTH) + ".png";
@@ -320,22 +368,21 @@ export default class SummaryView extends React.Component<any, any> {
             }
             header={Localizer.getString("ChangeDueDate")}
 
-
             onCancel={() => {
                 surveyExpiryChangeAlertOpen(false);
             }}
             onConfirm={() => {
                 updateDueDate(getStore().dueDate);
             }}
-        />
+        />;
     }
 
-    private getDueDateDialogConfirmationButtonProps(): IButtonProps {
+    private getDueDateDialogConfirmationButtonProps(): ButtonProps {
 
         let confirmButtonProps: ButtonProps = {
             // if difference less than 60 secs, keep it disabled
             disabled: Math.abs(getStore().dueDate - getStore().actionInstance.expiryTime) / 1000 <= 60
-        }
+        };
         Object.assign(confirmButtonProps, SurveyUtils.getDialogButtonProps(Localizer.getString("ChangeDueDate"), Localizer.getString("Change")));
         return confirmButtonProps;
     }
@@ -355,50 +402,6 @@ export default class SummaryView extends React.Component<any, any> {
                 dismissMenuAriaLabel={Localizer.getString("DismissMenu")}
             />
         );
-    }
-
-    getMenuItems(): AdaptiveMenuItem[] {
-        let menuItemList: AdaptiveMenuItem[] = [];
-        if (this.isCurrentUserCreator() && this.isSurveyActive()) {
-            let changeExpiry: AdaptiveMenuItem = {
-                key: "changeDueDate",
-                content: Localizer.getString("ChangeDueBy"),
-                icon: <CalendarIcon outline={true} />,
-                onClick: () => {
-                    if (getStore().progressStatus.updateActionInstance != ProgressState.InProgress)
-                        setProgressStatus({ updateActionInstance: ProgressState.NotStarted });
-                    surveyExpiryChangeAlertOpen(true);
-                }
-            };
-            menuItemList.push(changeExpiry);
-
-            let closeSurvey: AdaptiveMenuItem = {
-                key: "close",
-                content: Localizer.getString("CloseSurvey"),
-                icon: <BanIcon outline={true} />,
-                onClick: () => {
-                    if (getStore().progressStatus.deleteActionInstance != ProgressState.InProgress)
-                        setProgressStatus({ closeActionInstance: ProgressState.NotStarted });
-                    surveyCloseAlertOpen(true);
-                }
-            };
-            menuItemList.push(closeSurvey);
-        }
-
-        if (this.isCurrentUserCreator()) {
-            let deleteSurvey: AdaptiveMenuItem = {
-                key: "delete",
-                content: Localizer.getString("DeleteSurvey"),
-                icon: <TrashCanIcon outline={true} />,
-                onClick: () => {
-                    if (getStore().progressStatus.deleteActionInstance != ProgressState.InProgress)
-                        setProgressStatus({ deleteActionInstance: ProgressState.NotStarted });
-                    surveyDeleteAlertOpen(true);
-                }
-            };
-            menuItemList.push(deleteSurvey);
-        }
-        return menuItemList;
     }
 
     private isCurrentUserCreator(): boolean {
@@ -442,7 +445,7 @@ export default class SummaryView extends React.Component<any, any> {
             onConfirm={() => {
                 closeSurvey();
             }}
-        />
+        />;
     }
 
     private setupDeleteDialog() {
@@ -470,7 +473,7 @@ export default class SummaryView extends React.Component<any, any> {
             onConfirm={() => {
                 deleteSurvey();
             }}
-        />
+        />;
     }
 
     private getNonCreatorErrorView = () => {
@@ -488,7 +491,7 @@ export default class SummaryView extends React.Component<any, any> {
                     getStore().myRows.length > 0 ?
                         <a className="download-your-responses-link"
                             onClick={
-                                () => { downloadCSV() }
+                                () => { downloadCSV(); }
                             }>
                             {downloadStr}
                         </a> : null

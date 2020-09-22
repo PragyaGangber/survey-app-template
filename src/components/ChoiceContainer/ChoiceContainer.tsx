@@ -1,10 +1,12 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import "./ChoiceContainer.scss";
 import { InputBox } from "../InputBox";
 import { Text, ShorthandValue, AddIcon, BoxProps, TrashCanIcon } from "@fluentui/react-northstar";
 import { UxUtils } from "./../../utils/UxUtils";
 import { Constants } from "./../../utils/Constants";
-
 
 export interface IChoiceContainerOption {
     value: string;
@@ -30,6 +32,7 @@ export interface IChoiceContainerProps {
     onDeleteChoice?: (i) => void;
     onAddChoice?: () => void;
     className?: string;
+    maxLength?: number;
 }
 
 export class ChoiceContainer extends React.PureComponent<IChoiceContainerProps> {
@@ -44,7 +47,7 @@ export class ChoiceContainer extends React.PureComponent<IChoiceContainerProps> 
     getDeleteIconProps(i: number): ShorthandValue<BoxProps> {
         if (this.props.options.length > 2) {
             return {
-                content: <TrashCanIcon className="choice-trash-can" outline={true} aria-hidden='false' title={this.props.options[i].deleteChoiceLabel}
+                content: <TrashCanIcon className="choice-trash-can" outline={true} aria-hidden="false" title={this.props.options[i].deleteChoiceLabel}
                     onClick={() => {
                         if (this.currentFocus == this.props.options.length - 1) {
                             setTimeout((() => {
@@ -54,7 +57,7 @@ export class ChoiceContainer extends React.PureComponent<IChoiceContainerProps> 
                         this.props.onDeleteChoice(i);
                     }} />,
                 ...UxUtils.getTabKeyProps()
-            }
+            };
         }
         return null;
     }
@@ -64,25 +67,27 @@ export class ChoiceContainer extends React.PureComponent<IChoiceContainerProps> 
 
         let maxOptions: number = (this.props.limit && this.props.limit > 0) ? this.props.limit : Number.MAX_VALUE;
         let focusOnErrorSet: boolean = false;
-        let className: string = ('item-content' + ((this.props.options.length > 2) ? ' icon-padding' : ''));
+        let className: string = ("item-content" + ((this.props.options.length > 2) ? " icon-padding" : ""));
         for (let i = 0; i < (maxOptions > this.props.options.length ? this.props.options.length : maxOptions); i++) {
-            var errorString = this.props.optionsError && this.props.optionsError.length > i ? this.props.optionsError[i] : "";
+            let errorString = this.props.optionsError && this.props.optionsError.length > i ? this.props.optionsError[i] : "";
             if (errorString.length > 0 && this.props.focusOnError && !focusOnErrorSet) {
                 this.currentFocus = i;
                 focusOnErrorSet = true;
             }
             if (errorString.length > 0 && this.props.inputClassName) {
-                className = className + ' ' + this.props.inputClassName;
+                className = className + " " + this.props.inputClassName;
             }
             items.push(
                 <div key={"option" + i} className="choice-item">
                     <InputBox
                         ref={(inputBox) => {
-                            if (inputBox && i == this.currentFocus)
+                            if (inputBox && i == this.currentFocus) {
                                 inputBox.focus();
+                            }
                         }}
                         fluid
                         input={{ className }}
+                        maxLength={this.props.maxLength}
                         icon={this.getDeleteIconProps(i)}
                         showError={errorString.length > 0}
                         errorText={errorString}
@@ -113,7 +118,7 @@ export class ChoiceContainer extends React.PureComponent<IChoiceContainerProps> 
         }
         return (
             <div
-                className='choice-container'
+                className="choice-container"
                 onBlur={(e) => {
                     this.currentFocus = -1;
                 }}>

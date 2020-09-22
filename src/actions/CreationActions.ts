@@ -1,8 +1,11 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { action } from "satcheljs";
-import { QuestionDisplayType } from "../components/creation/questionContainer/QuestionDisplayType";
-import { ISettingsComponentProps } from "../common/SettingsCommon";
-import { InitializationState } from './../utils/SharedEnum';
-import { Page } from "../store/creation/Store";
+import { QuestionDisplayType } from "../components/Creation/questionContainer/QuestionDisplayType";
+import { ISettingsComponentProps } from "../components/Creation/Settings";
+import { ProgressState } from "./../utils/SharedEnum";
+import { Page } from "../store/CreationStore";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 
 export enum SurveyCreationAction {
@@ -17,7 +20,7 @@ export enum SurveyCreationAction {
     updateActiveQuestionIndex = "updateActiveQuestionIndex",
     updateSettings = "updateSettings",
     sendAction = "sendAction",
-    previewAction = "previewAction",  // To update response view store 
+    previewAction = "previewAction",  // To update response view store
     showPreview = "showPreview", // To show preview screen
     setValidationMode = "setValidationMode",
     setAppInitialized = "setAppInitialized",
@@ -90,7 +93,7 @@ export let initialize = action(SurveyCreationAction.initialize);
 
 export let setContext = action(SurveyCreationAction.setContext, (context: actionSDK.ActionSdkContext) => ({ context: context }));
 
-export let setAppInitialized = action(SurveyCreationAction.setAppInitialized, (state: InitializationState) => ({ state: state }));
+export let setAppInitialized = action(SurveyCreationAction.setAppInitialized, (state: ProgressState) => ({ state: state }));
 
 export let duplicateQuestion = action(SurveyCreationAction.duplicateQuestion, (index: number) => ({
     index: index
@@ -101,7 +104,6 @@ export let goToPage = action(SurveyCreationAction.goToPage, (page: Page) => ({ p
 export let updateCustomProps = action(SurveyCreationAction.updateCustomProps, (index: number, customProps: any) => ({ index: index, customProps: customProps }));
 
 export let setSendingFlag = action(SurveyCreationAction.setSendingFlag, (value: boolean) => ({ value: value }));
-
 
 export let updateChoiceText = action(SurveyCreationAction.updateChoiceText, (text: string, choiceIndex: number, questionIndex: number) => ({
     text: text,
@@ -117,7 +119,7 @@ export let initializeExternal = action(SurveyCreationAction.initializeExternal, 
 
 export let getTeamsGroupAndChannels = action(SurveyCreationAction.getTeamsGroupAndChannels);
 
-export let setTeamsGroupInitializationState = action(SurveyCreationAction.setTeamsGroupInitializationState, (state: InitializationState) => ({
+export let setTeamsGroupInitializationState = action(SurveyCreationAction.setTeamsGroupInitializationState, (state: ProgressState) => ({
     state: state
 }));
 

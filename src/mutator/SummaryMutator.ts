@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { mutator } from "satcheljs";
-import getStore, { SummaryPageViewType, ResponsesListViewType } from "../store/summary/Store";
+import getStore, { SummaryPageViewType, ResponsesListViewType } from "../store/SummaryStore";
 import {
     setContext,
     showMoreOptions,
@@ -55,7 +58,7 @@ mutator(showMoreOptions, (msg) => {
 
 mutator(updateSummary, (msg) => {
     const store = getStore();
-    store.actionSummary = msg.actionInstanceSummary
+    store.actionSummary = msg.actionInstanceSummary;
 });
 
 mutator(updateActionInstance, (msg) => {
@@ -156,12 +159,12 @@ mutator(updateContinuationToken, (msg) => {
 mutator(setResponseViewType, (msg) => {
     const store = getStore();
     store.responseViewType = msg.responseViewType;
-})
+});
 
 mutator(setSelectedQuestionDrillDownInfo, (msg) => {
     const store = getStore();
     store.selectedQuestionDrillDownInfo = msg.questionDrillDownInfo;
-})
+});
 
 mutator(setIsActionDeleted, (msg) => {
     const store = getStore();

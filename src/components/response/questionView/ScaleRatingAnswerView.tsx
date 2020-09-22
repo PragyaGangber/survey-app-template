@@ -1,7 +1,12 @@
-import * as React from 'react';
-import { QuestionView, IRatingAnswerProps } from './QuestionView';
-import { ScaleRatingView } from './../../RatingView';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+import * as React from "react";
+import { QuestionView, IRatingAnswerProps } from "./QuestionView";
+import { ScaleRatingView } from "./../../RatingView";
+/**
+ * This component renders for rating(numeric scale range) answers
+ */
 export class ScaleRatingAnswerView extends React.Component<IRatingAnswerProps> {
 
     render() {

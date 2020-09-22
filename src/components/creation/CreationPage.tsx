@@ -1,38 +1,37 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import { InitializationState } from '../../utils/SharedEnum';
+import { ProgressState } from "../../utils/SharedEnum";
 import { InputBox } from "../InputBox";
-import { ISettingsProps, Settings } from "./settingComponent/Settings";
 import { LoaderUI } from "../Loader";
-import { SettingsSummaryComponent } from "./settingComponent/SettingsSummaryComponent";
 import { INavBarComponentProps, NavBarItemType, NavBarComponent } from "../NavBarComponent";
-import { SettingsSections, ISettingsComponentProps, ISettingsComponentStrings } from "../../common/SettingsCommon";
-import { SettingsMobile } from "./settingComponent/SettingsMobile";
+import { SettingsSections, ISettingsComponentProps, ISettingsComponentStrings, Settings } from "./Settings";
 import { ErrorView } from "../ErrorView";
-import { Constants } from "./../../utils/Constants";
-import { UxUtils } from "./../../utils/UxUtils";
-import { QuestionContainer } from './questionContainer/QuestionContainer';
-import { ButtonComponent } from '../Button';
-import { AdaptiveMenuItem } from '../Menu';
-import getStore, { Page } from "../../store/creation/Store";
-import { Flex, FlexItem, Loader, Text, Dialog, SplitButton } from '@fluentui/react-northstar';
-import { ArrowDownIcon, AddIcon, BulletsIcon, FormatIcon, CallDialpadIcon, StarIcon, CalendarIcon } from '@fluentui/react-icons-northstar';
-import "./../../scss/Creation.scss";
+import { Constants } from "../../utils/Constants";
+import { UxUtils } from "../../utils/UxUtils";
+import { QuestionContainer } from "./questionContainer/QuestionContainer";
+import { AdaptiveMenuItem } from "../Menu";
+import getStore, { Page } from "../../store/CreationStore";
+import { Flex, FlexItem, Loader, Text, Dialog, SplitButton, Button } from "@fluentui/react-northstar";
+import { ArrowLeftIcon, AddIcon, BulletsIcon, FormatIcon, CallDialpadIcon, StarIcon, CalendarIcon, SettingsIcon } from "@fluentui/react-icons-northstar";
+import "./Creation.scss";
 import { QuestionDisplayType } from "./questionContainer/QuestionDisplayType";
 import {
     sendAction, addQuestion, updateSettings, updateTitle, previewAction, goToPage, fetchCurrentContext,
     setSendSurveyAlertOpen, validateAndSend,setValidationMode, setPreviousPage
 } from "../../actions/CreationActions";
 import { observer } from "mobx-react";
-import ResponsePage from "../response/ResponsePage";
+import ResponsePage from "../Response/ResponsePage";
 import { toJS } from "mobx";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 import { UpdateQuestionPage } from "./UpdateQuestionPage";
-import { SurveyUtils } from '../../common/SurveyUtils';
-import { ResponseViewMode } from "../../store/response/Store";
-import { Localizer } from '../../utils/Localizer';
+import { SurveyUtils } from "../../utils/SurveyUtils";
+import { ResponseViewMode } from "../../store/ResponseStore";
+import { Localizer } from "../../utils/Localizer";
 import { ActionSdkHelper } from "../../helper/ActionSdkHelper";
+import { Utils } from "../../utils/Utils";
 
-const LOG_TAG = "SurveyCreationPage";
 /**
  * This component renders the first page user sees when they wants to create a survey
  */
@@ -95,16 +94,14 @@ export default class CreationPage extends React.Component<any, any> {
 
     render() {
         ActionSdkHelper.hideLoadIndicator();
-        if (getStore().isInitialized === InitializationState.NotInitialized) {
+        if (getStore().isInitialized === ProgressState.NotStarted) {
             return <LoaderUI fill />;
-        }
-        else if (getStore().isInitialized === InitializationState.Failed) {
+        } else if (getStore().isInitialized === ProgressState.Failed) {
             return <ErrorView
                 title={Localizer.getString("GenericError")}
                 buttonTitle={Localizer.getString("Close")}
             />;
-        }
-        else if (getStore().initPending) {
+        } else if (getStore().initPending) {
             fetchCurrentContext();
             return <Loader />;
         }
@@ -122,6 +119,87 @@ export default class CreationPage extends React.Component<any, any> {
             case Page.UpdateQuestion:
                 return this.renderUpdateQuestionPage();
         }
+    }
+
+    getStringsForSettings(): ISettingsComponentStrings {
+        let settingsComponentStrings: ISettingsComponentStrings = {
+            dueBy: Localizer.getString("dueBy"),
+            multipleResponses: Localizer.getString("multipleResponses"),
+            responseOptions: Localizer.getString("responseOptions"),
+            resultsVisibleTo: Localizer.getString("resultsVisibleTo"),
+            resultsVisibleToAll: Localizer.getString("resultsVisibleToAll"),
+            resultsVisibleToSender: Localizer.getString("resultsVisibleToSender"),
+            datePickerPlaceholder: Localizer.getString("datePickerPlaceholder"),
+            timePickerPlaceholder: Localizer.getString("timePickerPlaceholder")
+        };
+        return settingsComponentStrings;
+    }
+
+    getMenuItems(): AdaptiveMenuItem[] {
+        let menuItemList: AdaptiveMenuItem[] = [];
+
+        let deleteSurvey: AdaptiveMenuItem = {
+            key: "changeDueDate",
+            content: Localizer.getString("deleteSurvey"),
+            icon: {},
+            onClick: () => {
+            }
+        };
+        menuItemList.push(deleteSurvey);
+        return menuItemList;
+    }
+
+    /**
+     * method to get the setting summary from selected due date and result visibility
+     */
+    getSettingsSummary(): string {
+        let settingsStrings: string[] = [];
+        let dueDate = new Date(getStore().settings.dueDate);
+        let resultVisibility = getStore().settings.resultVisibility;
+        if (dueDate) {
+            let dueDateString: string;
+            let dueDateValues: number[];
+            let dueIn: {} = Utils.getTimeRemaining(dueDate);
+            if (dueIn[Utils.YEARS] > 0) {
+                dueDateString = dueIn[Utils.YEARS] == 1 ? "DueInYear" : "DueInYears";
+                dueDateValues = [dueIn[Utils.YEARS]];
+            } else if (dueIn[Utils.MONTHS] > 0) {
+                dueDateString = dueIn[Utils.MONTHS] == 1 ? "DueInMonth" : "DueInMonths";
+                dueDateValues = [dueIn[Utils.MONTHS]];
+            } else if (dueIn[Utils.WEEKS] > 0) {
+                dueDateString = dueIn[Utils.WEEKS] == 1 ? "DueInWeek" : "DueInWeeks";
+                dueDateValues = [dueIn[Utils.WEEKS]];
+            } else if (dueIn[Utils.DAYS] > 0) {
+                dueDateString = dueIn[Utils.DAYS] == 1 ? "DueInDay" : "DueInDays";
+                dueDateValues = [dueIn[Utils.DAYS]];
+            } else if (dueIn[Utils.HOURS] > 0 && dueIn[Utils.MINUTES] > 0) {
+                if (dueIn[Utils.HOURS] == 1 && dueIn[Utils.MINUTES] == 1) {
+                    dueDateString = "DueInHourAndMinute";
+                } else if (dueIn[Utils.HOURS] == 1) {
+                    dueDateString = "DueInHourAndMinutes";
+                } else if (dueIn[Utils.MINUTES] == 1) {
+                    dueDateString = "DueInHoursAndMinute";
+                } else {
+                    dueDateString = "DueInHoursAndMinutes";
+                }
+                dueDateValues = [dueIn[Utils.HOURS], dueIn[Utils.MINUTES]];
+            } else if (dueIn[Utils.HOURS] > 0) {
+                dueDateString = dueIn[Utils.HOURS] == 1 ? "DueInHour" : "DueInHours";
+                dueDateValues = [dueIn[Utils.HOURS]];
+            } else {
+                dueDateString = dueIn[Utils.MINUTES] == 1 ? "DueInMinute" : "DueInMinutes";
+                dueDateValues = [dueIn[Utils.MINUTES]];
+            }
+            settingsStrings.push(Localizer.getString(dueDateString, ...dueDateValues));
+        }
+
+        if (resultVisibility) {
+            let visibilityString: string = resultVisibility == actionSDK.Visibility.All
+                ? "ResultsVisibilitySettingsSummaryEveryone" : "ResultsVisibilitySettingsSummarySenderOnly";
+            settingsStrings.push(Localizer.getString(visibilityString));
+        }
+
+        return settingsStrings.join(". ");
     }
 
     private renderMainPage() {
@@ -147,11 +225,12 @@ export default class CreationPage extends React.Component<any, any> {
                     <Flex className="footer-layout" gap={"gap.smaller"}>
                         {this.renderFooterSettingsSection()}
                         <FlexItem push>
-                            <ButtonComponent
+                            <Button
                                 primary
                                 content={shouldShowNext ? Localizer.getString("Next") : Localizer.getString("Preview")}
                                 className="preview-button"
-                                showLoader={getStore().isSendActionInProgress}
+                                loading={getStore().isSendActionInProgress}
+                                disabled={getStore().isSendActionInProgress}
                                 onClick={() => {
                                     if (shouldShowNext) {
                                         validateAndSend();
@@ -173,11 +252,12 @@ export default class CreationPage extends React.Component<any, any> {
             <Flex className={className} gap={"gap.smaller"}>
                 {this.renderFooterSettingsSection()}
                 <FlexItem push>
-                <ButtonComponent
+                <Button
                     primary
                     content={shouldShowNext ? Localizer.getString("Next") : Localizer.getString("Preview")}
                     className="preview-button"
-                    showLoader={getStore().isSendActionInProgress}
+                    loading={getStore().isSendActionInProgress}
+                    disabled={getStore().isSendActionInProgress}
                     onClick={() => {
                         if (shouldShowNext) {
                             validateAndSend();
@@ -194,7 +274,7 @@ export default class CreationPage extends React.Component<any, any> {
             let navBarComponentProps: INavBarComponentProps = {
                 title: Localizer.getString("Preview"),
                 leftNavBarItem: {
-                    icon: <ArrowDownIcon size="large" rotate={90} />,
+                    icon: <ArrowLeftIcon size="large" />,
                     ariaLabel: Localizer.getString("Back"),
                     onClick: () => {
                         goToPage(Page.Main);
@@ -211,11 +291,13 @@ export default class CreationPage extends React.Component<any, any> {
                     {this.setupSendSurveyDialog()}
                 </>
             );
-        }
-        else {
+        } else {
             let shouldShowNext: boolean = true;
             let sendButton: JSX.Element = (
-                <ButtonComponent primary showLoader={getStore().isSendActionInProgress}
+                <Button
+                    primary
+                    loading={getStore().isSendActionInProgress}
+                    disabled={getStore().isSendActionInProgress}
                     content={shouldShowNext ? Localizer.getString("Next") : Localizer.getString("SendSurvey")}
                     onClick={() => {
                         if (SurveyUtils.areAllQuestionsOptional(getStore().questions)) {
@@ -224,15 +306,16 @@ export default class CreationPage extends React.Component<any, any> {
                             sendAction();
                         }
                     }}>
-                </ButtonComponent>
+                </Button>
             );
             let editButton: JSX.Element = (
-                <ButtonComponent primary
+                <Button
+                    primary
                     content={Localizer.getString("Edit")}
                     onClick={() => {
                         goToPage(Page.Main);
                     }}>
-                </ButtonComponent>
+                </Button>
             );
             return (
                 <>
@@ -278,7 +361,7 @@ export default class CreationPage extends React.Component<any, any> {
             }}
             className="optional-questions-alert-dialog"
             aria-label={Localizer.getString("NoRequiredQuestion")}
-        />
+        />;
     }
 
     private renderSettingsPage() {
@@ -289,6 +372,7 @@ export default class CreationPage extends React.Component<any, any> {
             isResponseEditable: getStore().settings.isResponseEditable,
             locale: getStore().context.locale,
             dueDate: getStore().settings.dueDate,
+            isMultiResponseAllowed: getStore().settings.isMultiResponseAllowed,
             renderForMobile: UxUtils.renderingForMobile(),
             excludeSections: excludeSettingsSections,
             strings: this.getStringsForSettings(),
@@ -303,7 +387,7 @@ export default class CreationPage extends React.Component<any, any> {
             let navBarComponentProps: INavBarComponentProps = {
                 title: Localizer.getString("Settings"),
                 leftNavBarItem: {
-                    icon: <ArrowDownIcon size="large" rotate={90} />,
+                    icon: <ArrowLeftIcon size="large" />,
                     ariaLabel: Localizer.getString("Back"),
                     onClick: () => {
                         goToPage(Page.Main);
@@ -315,11 +399,11 @@ export default class CreationPage extends React.Component<any, any> {
             return (
                 <Flex className="body-container no-mobile-footer" column>
                     <NavBarComponent {...navBarComponentProps} />
-                    <SettingsMobile {...commonSettingsProps} />
+                    <Settings {...commonSettingsProps} />
                 </Flex>
             );
         } else {
-            let settingsProps: ISettingsProps = {
+            let settingsProps: ISettingsComponentProps = {
                 ...commonSettingsProps,
                 onBack: () => {
                     goToPage(Page.Main);
@@ -334,15 +418,20 @@ export default class CreationPage extends React.Component<any, any> {
     }
 
     private renderFooterSettingsSection() {
-        return <SettingsSummaryComponent
-            onRef={(element) => {
-                this.settingsFooterComponentRef = element;
-            }}
-            dueDate={new Date(getStore().settings.dueDate)}
-            resultVisibility={getStore().settings.resultVisibility}
-            onClick={() => {
-                goToPage(Page.Settings);
-            }} />
+        return (
+            <div className="settings-summary-footer" {...UxUtils.getTabKeyProps()}
+                ref={(element) => {
+                    this.settingsFooterComponentRef = element;
+                }}
+                onClick={() => {
+                    goToPage(Page.Settings);
+                }}>
+                <SettingsIcon className="settings-icon" outline={true} styles={({ theme: { siteVariables } }) => ({
+                    color: siteVariables.colorScheme.brand.foreground,
+                })} />
+                <Text content={this.getSettingsSummary()} size="small" color="brand" />
+            </div>
+        );
     }
     /**
     * actionSDK.ActionDataColumnValueType.SingleOption is used for rating type as well as single select type
@@ -352,19 +441,19 @@ export default class CreationPage extends React.Component<any, any> {
         let showTitleError: boolean = getStore().isValidationModeOn && SurveyUtils.isEmptyOrNull(getStore().title);
         let questionMenuItems = [];
         questionMenuItems.push(
-            this.getQuestionAdaptiveMenuItem('1', <BulletsIcon outline={true} className={"menu-icon"} />, "Multichoice", actionSDK.ActionDataColumnValueType.SingleOption, QuestionDisplayType.Select)
+            this.getQuestionAdaptiveMenuItem("1", <BulletsIcon outline={true} className={"menu-icon"} />, "Multichoice", actionSDK.ActionDataColumnValueType.SingleOption, QuestionDisplayType.Select)
         );
         questionMenuItems.push(
-            this.getQuestionAdaptiveMenuItem('2', <StarIcon outline={true} className={"menu-icon"} />, "Rating", actionSDK.ActionDataColumnValueType.SingleOption, QuestionDisplayType.FiveStar)
+            this.getQuestionAdaptiveMenuItem("2", <StarIcon outline={true} className={"menu-icon"} />, "Rating", actionSDK.ActionDataColumnValueType.SingleOption, QuestionDisplayType.FiveStar)
         );
         questionMenuItems.push(
-            this.getQuestionAdaptiveMenuItem('3', <FormatIcon outline={true} className={"menu-icon"} />, "Text", actionSDK.ActionDataColumnValueType.Text, QuestionDisplayType.None)
+            this.getQuestionAdaptiveMenuItem("3", <FormatIcon outline={true} className={"menu-icon"} />, "Text", actionSDK.ActionDataColumnValueType.Text, QuestionDisplayType.None)
         );
         questionMenuItems.push(
-            this.getQuestionAdaptiveMenuItem('4',  <CallDialpadIcon outline={true} className={"menu-icon"} />, "Number", actionSDK.ActionDataColumnValueType.Numeric, QuestionDisplayType.None)
+            this.getQuestionAdaptiveMenuItem("4",  <CallDialpadIcon outline={true} className={"menu-icon"} />, "Number", actionSDK.ActionDataColumnValueType.Numeric, QuestionDisplayType.None)
         );
         questionMenuItems.push(
-            this.getQuestionAdaptiveMenuItem('5', <CalendarIcon outline={true} className={"menu-icon"} />, "DateText", actionSDK.ActionDataColumnValueType.Date, QuestionDisplayType.None)
+            this.getQuestionAdaptiveMenuItem("5", <CalendarIcon outline={true} className={"menu-icon"} />, "DateText", actionSDK.ActionDataColumnValueType.Date, QuestionDisplayType.None)
         );
         return (
             <Flex column>
@@ -386,10 +475,9 @@ export default class CreationPage extends React.Component<any, any> {
                         isValidationModeOn={getStore().isValidationModeOn}
                         questions={toJS(getStore().questions)}
                         activeQuestionIndex={getStore().activeQuestionIndex}
-                        className={getStore().questions.length === 0 ? 'hidden' : 'visible'}
+                        className={getStore().questions.length === 0 ? "hidden" : "visible"}
                     />
                 }
-                
 
                 <Flex className="add-question-button-container">
                     <SplitButton
@@ -397,7 +485,7 @@ export default class CreationPage extends React.Component<any, any> {
                     key= "show-menu"
                     id="add-question"
                     menu={questionMenuItems}
-                    className= 'show-menu-button'
+                    className= "show-menu-button"
                     button={{
                         content: Localizer.getString("AddQuestion"),
                         className: "add-question-button",
@@ -405,7 +493,7 @@ export default class CreationPage extends React.Component<any, any> {
                         key: "add",
                         id: SurveyUtils.ADDQUESTIONBUTTONID,
                         size: "large",
-                        'aria-label': Localizer.getString("AddQuestion"),
+                        "aria-label": Localizer.getString("AddQuestion"),
                         onClick: (e, props) => {
                             e.stopPropagation();
                             setValidationMode(false);
@@ -419,10 +507,10 @@ export default class CreationPage extends React.Component<any, any> {
                         }
                     }}
                     primary
-                    toggleButton={{ 'aria-label': 'more-options' }}
+                    toggleButton={{ "aria-label": "more-options" }}
                 />
                 </Flex>
-                <label className={(getStore().isValidationModeOn && getStore().questions.length == 0 ? 'invalid' : 'hidden')} >{Localizer.getString("EmptySurveyQuestions")}</label>
+                <label className={(getStore().isValidationModeOn && getStore().questions.length == 0 ? "invalid" : "hidden")} >{Localizer.getString("EmptySurveyQuestions")}</label>
             </Flex>
         );
     }
@@ -440,36 +528,8 @@ export default class CreationPage extends React.Component<any, any> {
                 addQuestion(columnType, displayType, customProps, UxUtils.renderingForMobile());
                 setValidationMode(false);
             }
-        }
-        return menuItem;
-    }
-
-    getStringsForSettings(): ISettingsComponentStrings {
-        let settingsComponentStrings: ISettingsComponentStrings = {
-            dueBy: Localizer.getString("dueBy"),
-            multipleResponses: Localizer.getString("multipleResponses"),
-            responseOptions: Localizer.getString("responseOptions"),
-            resultsVisibleTo: Localizer.getString("resultsVisibleTo"),
-            resultsVisibleToAll: Localizer.getString("resultsVisibleToAll"),
-            resultsVisibleToSender: Localizer.getString("resultsVisibleToSender"),
-            datePickerPlaceholder: Localizer.getString("datePickerPlaceholder"),
-            timePickerPlaceholder: Localizer.getString("timePickerPlaceholder")
-        }
-        return settingsComponentStrings;
-    }
-
-    getMenuItems(): AdaptiveMenuItem[] {
-        let menuItemList: AdaptiveMenuItem[] = [];
-
-        let deleteSurvey: AdaptiveMenuItem = {
-            key: "changeDueDate",
-            content: Localizer.getString("deleteSurvey"),
-            icon: {},
-            onClick: () => {
-            }
         };
-        menuItemList.push(deleteSurvey);
-        return menuItemList;
+        return menuItem;
     }
 
 }

@@ -1,12 +1,15 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import './ErrorView.scss';
+import "./ErrorView.scss";
 import {
     Flex,
     Text,
     Button
 } from "@fluentui/react-northstar";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { ActionSdkHelper } from "../../helper/ActionSdkHelper"
+import { ActionSdkHelper } from "../../helper/ActionSdkHelper";
 
 export interface IErrorViewProps {
     image?: string;

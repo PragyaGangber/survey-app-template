@@ -1,9 +1,12 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import "./ActionRootView.scss";
-import { Provider, teamsTheme, teamsDarkTheme, teamsHighContrastTheme, ThemePrepared } from '@fluentui/react-northstar'
+import { Provider, teamsTheme, teamsDarkTheme, teamsHighContrastTheme, ThemePrepared } from "@fluentui/react-northstar";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 import { Utils } from "./../../utils/Utils";
-import { ActionSdkHelper } from "../../helper/ActionSdkHelper"
+import { ActionSdkHelper } from "../../helper/ActionSdkHelper";
 
 interface IActionRootViewState {
     hostContext: actionSDK.ActionSdkContext;
@@ -12,7 +15,6 @@ interface IActionRootViewState {
     meetingMemberCount?: number;
 }
 export class ActionRootView extends React.Component<any, IActionRootViewState> {
-    private LOG_TAG = "ActionRootView";
 
     constructor(props: any) {
         super(props);
@@ -81,10 +83,8 @@ export class ActionRootView extends React.Component<any, IActionRootViewState> {
             case "dark":
                 classNames.push("theme-dark");
                 break;
-            case "default":
-                classNames.push("theme-default");
-                break;
             default:
+                classNames.push("theme-default");
                 break;
         }
 

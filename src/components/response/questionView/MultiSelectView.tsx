@@ -1,8 +1,13 @@
-import * as React from 'react';
-import { QuestionView, IMultiChoiceProps } from './QuestionView';
-import { Checkbox } from '@fluentui/react-northstar';
-import './../../../scss/Response.scss'
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+import * as React from "react";
+import { QuestionView, IMultiChoiceProps } from "./QuestionView";
+import { Checkbox } from "@fluentui/react-northstar";
+import "../Response.scss";
+/**
+ * This component renders for the MCQ multi select answers
+ */
 export class MultiSelectView extends React.Component<IMultiChoiceProps> {
 
     private selectedOption: string[] = [];

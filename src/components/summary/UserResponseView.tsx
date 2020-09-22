@@ -1,18 +1,19 @@
-import * as React from 'react';
-import { Flex, Text } from '@fluentui/react-northstar';
-import { ChevronDownIcon, ArrowDownIcon } from '@fluentui/react-icons-northstar';
-import { observer } from 'mobx-react';
-import ResponsePage from '../response/ResponsePage';
-import { NavBarComponent, NavBarItemType, INavBarComponentProps } from './../NavBarComponent';
-import { UserInfoView } from './../UserInfoView';
-import * as actionSDK from "@microsoft/m365-action-sdk";
-import { ResponseViewMode } from '../../store/response/Store';
-import getStore from "../../store/summary/Store";
-import "../../scss/Response.scss";
-import { Utils } from '../../utils/Utils';
-import {Localizer} from '../../utils/Localizer';
-import {UxUtils} from './../../utils/UxUtils';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+import * as React from "react";
+import { Flex, Text } from "@fluentui/react-northstar";
+import { ChevronStartIcon, ArrowLeftIcon, ChevronEndIcon } from "@fluentui/react-icons-northstar";
+import { observer } from "mobx-react";
+import ResponsePage from "../Response/ResponsePage";
+import { NavBarComponent, NavBarItemType, INavBarComponentProps } from "./../NavBarComponent";
+import { UserInfoView } from "./../UserInfoView";
+import * as actionSDK from "@microsoft/m365-action-sdk";
+import { ResponseViewMode } from "../../store/ResponseStore";
+import "../Response/Response.scss";
+import { Utils } from "../../utils/Utils";
+import { Localizer } from "../../utils/Localizer";
+import { UxUtils } from "./../../utils/UxUtils";
 
 export interface IUserResponsePage {
     responses: actionSDK.ActionDataRow[];
@@ -58,10 +59,9 @@ export class UserResponseView extends React.Component<IUserResponsePage, any>  {
                     <Flex onClick={isFirstResponse ? null : () => {
                         this.props.showResponseView(currentResponseIndex - 1, responses);
                     }}>
-                        <ChevronDownIcon
+                        <ChevronStartIcon
                             {...(!isFirstResponse && UxUtils.getTabKeyProps())}
                             aria-label={Localizer.getString("PreviousResponse")}
-                            rotate={90}
                             xSpacing="after"
                             size="medium"
                             className={isFirstResponse ? "" : "pointer-cursor"}
@@ -83,10 +83,9 @@ export class UserResponseView extends React.Component<IUserResponsePage, any>  {
                     <Flex onClick={isLastResponse ? null : () => {
                         this.props.showResponseView(this.props.currentResponseIndex + 1, responses);
                     }}>
-                        <ChevronDownIcon
+                        <ChevronEndIcon
                             {...(!isLastResponse && UxUtils.getTabKeyProps())}
                             aria-label={Localizer.getString("NextResponse")}
-                            rotate={270}
                             xSpacing="before"
                             size="medium"
                             className={isLastResponse ? "" : "pointer-cursor"}
@@ -102,8 +101,6 @@ export class UserResponseView extends React.Component<IUserResponsePage, any>  {
     private getContainerClassName(): string {
         if (UxUtils.renderingForMobile()) {
             return "body-container no-mobile-footer";
-        } else if (getStore().inPersonalAppMode) {
-            return "personal-app-body";
         } else {
             return "body-container response-view";
         }
@@ -111,15 +108,12 @@ export class UserResponseView extends React.Component<IUserResponsePage, any>  {
     }
 
     private getFooterView() {
-        if (getStore().inPersonalAppMode) {
-            return null;
-        }
         return (
             <Flex className="footer-layout" gap={"gap.smaller"}>
                 <Flex vAlign="center" className="pointer-cursor" {...UxUtils.getTabKeyProps()} onClick={() => {
                     this.props.goBack();
                 }} >
-                    <ChevronDownIcon rotate={90} xSpacing="after" size="small" />
+                    <ChevronStartIcon xSpacing="after" size="small" />
                     <Text content={Localizer.getString("Back")} />
                 </Flex>
             </Flex>
@@ -130,7 +124,7 @@ export class UserResponseView extends React.Component<IUserResponsePage, any>  {
         let navBarComponentProps: INavBarComponentProps = {
             title: Localizer.getString("Back"),
             leftNavBarItem: {
-                icon:  <ArrowDownIcon size="large" rotate={90} />,
+                icon:  <ArrowLeftIcon size="large" />,
                 ariaLabel: Localizer.getString("Back"),
                 onClick: () => {
                     this.props.goBack();

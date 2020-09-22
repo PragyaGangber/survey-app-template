@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as actionSDK from "@microsoft/m365-action-sdk";
 
 export class Localizer {
@@ -9,10 +12,6 @@ export class Localizer {
    * found it will fallback to default locale strings i.e. strings_en.json file.
    * @return promise returning either success or ActionError
    */
-  /* public static async initialize(): Promise<boolean> {
-        this.jsonObject = await Host.executeActionSDKApi<any>(ActionSdkCommand.GetLocalizedActionStrings);
-        return true;
-    }*/
   public static async initialize(): Promise<boolean> {
     let request = new actionSDK.GetLocalizedStrings.Request();
     let response = (await actionSDK.executeApi(
@@ -30,8 +29,9 @@ export class Localizer {
    * @param args any arguments which needs to passed
    */
   public static getString(id: string, ...args: any[]): string {
-    if (this.jsonObject && this.jsonObject[id])
+    if (this.jsonObject && this.jsonObject[id]) {
       return this.getStringInternal(this.jsonObject[id], ...args);
+    }
     return this.getStringInternal(id, ...args);
   }
 

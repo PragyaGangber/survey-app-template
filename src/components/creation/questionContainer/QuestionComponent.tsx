@@ -1,16 +1,19 @@
-import * as React from 'react'
-import { Checkbox, Flex, Input, Text, Divider } from '@fluentui/react-northstar';
-import { CalendarIcon } from '@fluentui/react-icons-northstar';
-import { MCQComponent } from './MultiChoiceQuestion';
-import { RatingsQuestionComponent } from './RatingsQuestionComponent';
-import { QuestionDisplayType } from './QuestionDisplayType';
-import * as actionSDK from "@microsoft/m365-action-sdk";
-import '../../../scss/Creation.scss';
-import { InputBox } from './../../InputBox';
-import { updateQuestion } from '../../../actions/CreationActions';
-import { observer } from 'mobx-react';
-import { Localizer } from "../../../utils/Localizer";
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+import * as React from "react";
+import { Checkbox, Flex, Input, Text, Divider } from "@fluentui/react-northstar";
+import { CalendarIcon } from "@fluentui/react-icons-northstar";
+import { MCQComponent } from "./MultiChoiceQuestion";
+import { RatingsQuestionComponent } from "./RatingsQuestionComponent";
+import { QuestionDisplayType } from "./QuestionDisplayType";
+import * as actionSDK from "@microsoft/m365-action-sdk";
+import "../Creation.scss";
+import { InputBox } from "../../InputBox";
+import { updateQuestion } from "../../../actions/CreationActions";
+import { observer } from "mobx-react";
+import { Localizer } from "../../../utils/Localizer";
+import { Constants } from "../../../utils/Constants";
 
 export interface IQuestionComponentProps {
     question: actionSDK.ActionDataColumn;
@@ -21,29 +24,14 @@ export interface IQuestionComponentProps {
     onChange?: (props: IQuestionComponentProps) => void;
 }
 /**
-* Question component which defines/gets the question formatting based in the type user wants to add 
+* Question component which defines/gets the question formatting based in the type user wants to add
 */
 @observer
 export default class QuestionComponent extends React.Component<IQuestionComponentProps> {
     constructor(props: IQuestionComponentProps) {
         super(props);
     }
-    /**
-    * Question component used for question type: text/number/date
-    */
-    private getQuestionBase(placeholder: string, thisProps: any, icon?: any) {
-        return (
-            <Flex column className="question-base" gap="gap.medium">
-                <Input disabled placeholder={placeholder} fluid icon={icon} className="question-item" />
-                <Divider className="question-divider" />
-                <Checkbox checked={!(this.props.question.allowNullValue)} label={Localizer.getString("Required")} onChange={(e, data) => {
-                    thisProps.question.allowNullValue = !(data.checked);
-                    this.props.onChange(thisProps);
-                }} className="required-question-checkbox" />
-            </Flex>
-        );
-    }
-    
+
     getDisplayType(question: actionSDK.ActionDataColumn) {
         let customProperties = JSON.parse(question.properties);
         if (customProperties && customProperties.hasOwnProperty("dt")) {
@@ -124,7 +112,8 @@ export default class QuestionComponent extends React.Component<IQuestionComponen
                                     }, 0);
                                 }
                             }}
-                            className={(this.props.isValidationModeOn && question.displayName.length == 0 ? 'invalid' : '')}
+                            maxLength={Constants.SURVEY_QUESTION_MAX_LENGTH}
+                            className={(this.props.isValidationModeOn && question.displayName.length == 0 ? "invalid" : "")}
                             fluid
                             key={this.props.questionIndex + question.displayName}
                             defaultValue={question.displayName}
@@ -139,13 +128,28 @@ export default class QuestionComponent extends React.Component<IQuestionComponen
                             showError={(this.props.isValidationModeOn && question.displayName.length == 0)}
                             errorText={Localizer.getString("EmptyQuestionTitle")}
                             input={{
-                                className: (this.props.isValidationModeOn && question.displayName.length == 0 ? 'invalid-error' : '')
+                                className: (this.props.isValidationModeOn && question.displayName.length == 0 ? "invalid-error" : "")
                             }}
                         />
                     </div>
                     {this.getQuestionView()}
                 </Flex>
             </Flex>
-        )
+        );
+    }
+    /**
+    * Question component used for question type: text/number/date
+    */
+    private getQuestionBase(placeholder: string, thisProps: any, icon?: any) {
+        return (
+            <Flex column className="question-base" gap="gap.medium">
+                <Input disabled placeholder={placeholder} fluid icon={icon} className="question-item" />
+                <Divider className="question-divider" />
+                <Checkbox checked={!(this.props.question.allowNullValue)} label={Localizer.getString("Required")} onChange={(e, data) => {
+                    thisProps.question.allowNullValue = !(data.checked);
+                    this.props.onChange(thisProps);
+                }} className="required-question-checkbox" />
+            </Flex>
+        );
     }
 }

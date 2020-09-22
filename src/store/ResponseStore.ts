@@ -1,8 +1,11 @@
-import { createStore, action } from 'satcheljs';
-import '../../mutator/ResponseMutator';
-import '../../orchestrators/ResponseOrchestrators';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { createStore } from "satcheljs";
+import "../mutator/ResponseMutator";
+import "../orchestrators/ResponseOrchestrators";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { InitializationState } from './../../utils/SharedEnum';
+import { ProgressState } from "../utils/SharedEnum";
 
 export enum ResponsePageViewType {
     Main,
@@ -26,7 +29,7 @@ interface ISurveyResponseStore {
     };
     savedActionInstanceRow: {};
     isValidationModeOn: boolean;
-    isInitialized: InitializationState;
+    isInitialized: ProgressState;
     isSendActionInProgress: boolean;
     currentView: ResponsePageViewType;
     myResponses: actionSDK.ActionDataRow[];
@@ -46,7 +49,7 @@ const store: ISurveyResponseStore = {
     },
     savedActionInstanceRow: {},
     isValidationModeOn: false,
-    isInitialized: InitializationState.NotInitialized,
+    isInitialized: ProgressState.NotStarted,
     isSendActionInProgress: false,
     currentView: ResponsePageViewType.Main,
     myResponses: [],
@@ -55,6 +58,6 @@ const store: ISurveyResponseStore = {
     responseSubmissionFailed: false,
     topMostErrorIndex: -1,
     isActionDeleted: false
-}
+};
 
-export default createStore<ISurveyResponseStore>('responseStore', store);
+export default createStore<ISurveyResponseStore>("responseStore", store);

@@ -1,25 +1,28 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import { observer } from "mobx-react";
-import getStore, { QuestionDrillDownInfo } from "../../store/summary/Store";
+import getStore, { QuestionDrillDownInfo } from "../../store/SummaryStore";
 import { Flex, Text, Divider, Avatar, Loader, FlexItem } from "@fluentui/react-northstar";
-import { RetryIcon, ChevronDownIcon } from '@fluentui/react-icons-northstar';
-import { goBack, fetchActionInstanceRows } from '../../actions/SummaryActions';
+import { RetryIcon, ChevronStartIcon } from "@fluentui/react-icons-northstar";
+import { goBack, fetchActionInstanceRows } from "../../actions/SummaryActions";
 import { RecyclerViewComponent, RecyclerViewType } from "./../RecyclerViewComponent";
-import {ProgressState} from './../../utils/SharedEnum';
-import {UxUtils} from './../../utils/UxUtils';
+import { ProgressState } from "./../../utils/SharedEnum";
+import { UxUtils } from "./../../utils/UxUtils";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import "../../scss/Response.scss";
-import { QuestionDisplayType } from "../creation/questionContainer/QuestionDisplayType";
-import {Localizer} from '../../utils/Localizer';
+import "../Response/Response.scss";
+import { QuestionDisplayType } from "../../components/Creation/questionContainer/QuestionDisplayType";
+import { Localizer } from "../../utils/Localizer";
 
 export interface IResponseAggregationViewProps {
     questionInfo: QuestionDrillDownInfo;
 }
 
 interface IResponseRowProps {
-    senderName: string,
-    rowData?: any,
-    profilePhoto: string
+    senderName: string;
+    rowData?: any;
+    profilePhoto: string;
 }
 
 @observer
@@ -30,6 +33,17 @@ export default class ResponseAggregationView extends React.Component<IResponseAg
 
     componentWillMount() {
         fetchActionInstanceRows();
+    }
+
+    render() {
+        return (
+            <>
+                <Flex className="body-container">
+                    {this.getBody()}
+                </Flex>
+                {this.getFooter()}
+            </>
+        );
     }
 
     private onRowRender(type: RecyclerViewType, index: number, props: IResponseRowProps, status: ProgressState, rowsFetchCallback): JSX.Element {
@@ -104,7 +118,7 @@ export default class ResponseAggregationView extends React.Component<IResponseAg
                 <Flex vAlign="center" className="pointer-cursor" {...UxUtils.getTabKeyProps()} onClick={() => {
                     goBack();
                 }} >
-                    <ChevronDownIcon rotate={90} xSpacing="after" size="small" />
+                    <ChevronStartIcon xSpacing="after" size="small" />
                     <Text content={Localizer.getString("Back")} />
                 </Flex>
             </Flex>
@@ -114,7 +128,7 @@ export default class ResponseAggregationView extends React.Component<IResponseAg
     private getBody(): JSX.Element {
         const rowHeight = 100;
         this.responseRows = [];
-        for (var row of getStore().actionInstanceRows) {
+        for (let row of getStore().actionInstanceRows) {
             this.addRowData(row);
         }
         return (
@@ -163,7 +177,7 @@ export default class ResponseAggregationView extends React.Component<IResponseAg
                 return;
             }
         }
-        var userProfile: actionSDK.SubscriptionMember = getStore().userProfile[row.creatorId];
+        let userProfile: actionSDK.SubscriptionMember = getStore().userProfile[row.creatorId];
         let responseRow: Partial<IResponseRowProps> = {};
         if (userProfile) {
             responseRow.senderName = getStore().context.userId == row.creatorId ? Localizer.getString("You") : userProfile.displayName;
@@ -180,17 +194,5 @@ export default class ResponseAggregationView extends React.Component<IResponseAg
         }
         this.responseRows.push(responseRow);
     }
-
-    render() {
-        return (
-            <>
-                <Flex className="body-container">
-                    {this.getBody()}
-                </Flex>
-                {this.getFooter()}
-            </>
-        );
-    }
-
 
 }

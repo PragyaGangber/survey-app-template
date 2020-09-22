@@ -1,8 +1,11 @@
-import * as React from 'react';
-import { QuestionView, IQuestionProps } from './QuestionView';
-import { DateTimePickerView, IDateTimePickerViewProps } from './../../DateTime';
-import {Localizer} from '../../../utils/Localizer';
-import {UxUtils} from './../../../utils/UxUtils';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import { QuestionView, IQuestionProps } from "./QuestionView";
+import { DateTimePickerView, IDateTimePickerViewProps } from "./../../DateTime";
+import { Localizer } from "../../../utils/Localizer";
+import { UxUtils } from "./../../../utils/UxUtils";
 
 export class DateOnlyAnswerView extends React.Component<IQuestionProps> {
 

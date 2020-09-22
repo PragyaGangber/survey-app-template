@@ -1,5 +1,8 @@
-import * as React from 'react';
-import { Constants } from './Constants';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import { Constants } from "./Constants";
 
 export class UxUtils {
     public static getTabKeyProps() {
@@ -7,7 +10,7 @@ export class UxUtils {
             tabIndex: 0,
             role: "button",
             ...this.getClickOnCarriageReturnHandler()
-        }
+        };
     }
 
     public static getTabKeyPropsRoleRadio() {
@@ -15,14 +18,14 @@ export class UxUtils {
             tabIndex: 0,
             role: "radio",
             ...this.getClickOnCarriageReturnHandler()
-        }
+        };
     }
 
     public static getListItemProps() {
         return {
             "data-is-focusable": "true",
             ...UxUtils.getClickOnCarriageReturnHandler()
-        }
+        };
     }
 
     private static getClickOnCarriageReturnHandler() {
@@ -32,18 +35,18 @@ export class UxUtils {
                     (event.currentTarget as HTMLDivElement).click();
                 }
             }
-        }
+        };
     }
 
     public static getTappableInputWrapperRole() {
         if (this.renderingForiOS()) {
             return {
                 role: "combobox"
-            }
+            };
         }
         return {
             role: "button"
-        }
+        };
     }
 
     public static renderingForMobile(): boolean {
@@ -76,7 +79,7 @@ export class UxUtils {
         let formattedDate = selectedDate.toLocaleDateString(locale, dateOptions);
         //check if M01, M02, ...M12 pattern is present in the string, if pattern is present, using numeric representation of the month instead
         if (formattedDate.match(/M[\d]{2}/)) {
-            let newOptions = { ...dateOptions, 'month': '2-digit' };
+            let newOptions = { ...dateOptions, "month": "2-digit" };
             formattedDate = selectedDate.toLocaleDateString(locale, newOptions);
         }
         return formattedDate;

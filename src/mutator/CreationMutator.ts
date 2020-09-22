@@ -1,9 +1,11 @@
-import { ResultVisibility } from '../common/SettingsCommon';
-import * as actionSDK from '@microsoft/m365-action-sdk';
-import { toJS } from 'mobx';
-import { mutator } from 'satcheljs';
-import { Localizer } from '../utils/Localizer';
-import { Utils } from '../utils/Utils';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as actionSDK from "@microsoft/m365-action-sdk";
+import { toJS } from "mobx";
+import { mutator } from "satcheljs";
+import { Localizer } from "../utils/Localizer";
+import { Utils } from "../utils/Utils";
 
 import {
     addQuestion,
@@ -31,10 +33,10 @@ import {
     setSendSurveyAlertOpen,
     setPreviousPage,
     setShouldFocusOnError
-} from '../actions/CreationActions';
-import getStore, { Page } from '../store/creation/Store';
-import { QuestionDisplayType } from '../components/creation/questionContainer/QuestionDisplayType';
-import { SurveyUtils } from '../common/SurveyUtils';
+} from "../actions/CreationActions";
+import getStore, { Page } from "../store/CreationStore";
+import { QuestionDisplayType } from "../components/Creation/questionContainer/QuestionDisplayType";
+import { SurveyUtils } from "../utils/SurveyUtils";
 
 /**
 * This mutator function calls is to update the states to store the data for the current session
@@ -61,7 +63,7 @@ mutator(addQuestion, (msg) => {
         displayName: "",
         allowNullValue: true,
         options: []
-    }
+    };
     if (displayType != null) {
         question.properties = JSON.stringify({ "dt": displayType });
         if (displayType == QuestionDisplayType.Select) {
@@ -160,12 +162,12 @@ mutator(updateActiveQuestionIndex, (msg) => {
 mutator(showPreview, (msg) => {
     const store = getStore();
     store.preview = msg.showPreview;
-})
+});
 
 mutator(setValidationMode, (msg) => {
     const store = getStore();
     store.isValidationModeOn = msg.validationMode;
-})
+});
 
 mutator(duplicateQuestion, (msg) => {
     const store = getStore();
@@ -180,7 +182,7 @@ mutator(duplicateQuestion, (msg) => {
     questions[msg.index + 1] = currentQuestionCopy;
     store.activeQuestionIndex = msg.index + 1;
     store.questions = questions;
-})
+});
 
 /**
 * This function gets the context as parameter and initialize the variables accordingly.
@@ -196,44 +198,44 @@ mutator(setContext, (msg) => {
         const actionInstance: actionSDK.Action = lastSessionData.action;
         getStore().title = actionInstance.displayName;
         updateQuestions(actionInstance.dataTables[0].dataColumns);
-        getStore().settings.resultVisibility = getRowsVisibility(actionInstance.dataTables[0].rowsVisibility);
+        getStore().settings.resultVisibility = actionInstance.dataTables[0].rowsVisibility;
         getStore().settings.dueDate = actionInstance.expiryTime;
+        getStore().settings.isMultiResponseAllowed = actionInstance.dataTables[0].canUserAddMultipleRows;
     }
-})
-    
+
+});
 
 mutator(goToPage, (msg) => {
     const store = getStore();
     store.previousPage = store.currentPage;
     store.currentPage = msg.page;
-})
+});
 
 mutator(updateCustomProps, (msg) => {
     const store = getStore();
     const question = store.questions[msg.index];
     question.properties = JSON.stringify(msg.customProps);
     store.questions[msg.index] = question;
-})
+});
 
 mutator(setSendingFlag, (msg) => {
     const store = getStore();
     store.isSendActionInProgress = msg.value;
-})
+});
 
 mutator(updateChoiceText, (msg) => {
     const store = getStore();
     const questionsCopy = [...store.questions];
     questionsCopy[msg.questionIndex].options[msg.choiceIndex].displayName = msg.text;
     store.questions = questionsCopy;
-})
+});
 
 mutator(showUpdateQuestionPage, (msg) => {
     const store = getStore();
     store.activeQuestionIndex = msg.questionIndex;
     store.previousPage = store.currentPage;
     store.currentPage = Page.UpdateQuestion;
-})
-
+});
 
 function copyQuestion(question: actionSDK.ActionDataColumn): actionSDK.ActionDataColumn {
     return { ...question };
@@ -277,29 +279,17 @@ mutator(setPreviousPage, (msg) => {
 mutator(setShouldFocusOnError, (msg) => {
     const store = getStore();
     store.shouldFocusOnError = msg.value;
-})
-
-/**
- * Returns ResultVisibility type on the basis of boolean.
- * @param visible variable defining visibility of rows.
- */
-function getRowsVisibility(visible: actionSDK.Visibility) {
-    if (visible == actionSDK.Visibility.All) {
-        return ResultVisibility.All;
-    } else {
-        return ResultVisibility.Sender;
-    }
-}
+});
 
 /**
  * Updates the values in getStore().questions using "cl" i.e columns field in viewData
- * @param questions ~ separated  
+ * @param questions ~ separated
  */
 function updateQuestions(questions: actionSDK.ActionDataColumn[]) {
     let columns: actionSDK.ActionDataColumn[] = getStore().questions;
     let id: number = 0;
     questions.forEach(question => {
-        let titleString = question.displayName; 
+        let titleString = question.displayName;
         let column: actionSDK.ActionDataColumn = {
             displayName: titleString,
             name: "",
@@ -308,7 +298,7 @@ function updateQuestions(questions: actionSDK.ActionDataColumn[]) {
             properties: "",
             options: []
         };
-        column.allowNullValue = question.allowNullValue; 
+        column.allowNullValue = question.allowNullValue;
         let displayType: number = getDisplayType(question) ;
 
         let customProperties = getCustomProperty(displayType);
@@ -359,7 +349,7 @@ function fillMultiChoiceOptions(optionsArray: actionSDK.ActionDataColumnOption[]
     optionsArray.forEach(option => {
         let columnOption: actionSDK.ActionDataColumnOption = {
             name: optionId.toString(),
-            displayName: option.displayName 
+            displayName: option.displayName
         };
         optionId++;
         columnOptions.push(columnOption);
@@ -401,30 +391,30 @@ function getCustomProperty(displayType: number) {
                 dt: displayType,
                 level: 5,
                 type: Localizer.getString("StarText")
-            }
+            };
         case QuestionDisplayType.TenStar:
             return {
                 dt: displayType,
                 level: 10,
                 type: Localizer.getString("StarText")
-            }
+            };
         case QuestionDisplayType.FiveNumber:
             return {
                 dt: displayType,
                 level: 5,
                 type: Localizer.getString("Number")
-            }
+            };
         case QuestionDisplayType.TenNumber:
             return {
                 dt: displayType,
                 level: 10,
                 type: Localizer.getString("Number")
-            }
+            };
         case QuestionDisplayType.LikeDislike:
             return {
                 dt: displayType,
                 type: Localizer.getString("LikeDislike")
-            }
+            };
     }
     return null;
 }

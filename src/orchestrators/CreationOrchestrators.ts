@@ -1,43 +1,44 @@
-import { validateAndSend } from './../actions/CreationActions';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { validateAndSend } from "./../actions/CreationActions";
 import { orchestrator } from "satcheljs";
 import { sendAction, previewAction, setSendingFlag, setValidationMode, initialize, setAppInitialized, goToPage, updateActiveQuestionIndex, setSendSurveyAlertOpen, setShouldFocusOnError, fetchCurrentContext, setContext } from "../actions/CreationActions";
-import getStore, { Page } from '../store/creation/Store';
+import getStore, { Page } from "../store/CreationStore";
 import { UxUtils } from "./../utils/UxUtils";
-import { toJS } from 'mobx';
+import { toJS } from "mobx";
 import { initializeExternal } from "./../actions/ResponseActions";
-import { SurveyUtils } from "../common/SurveyUtils"
+import { SurveyUtils } from "../utils/SurveyUtils";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { Localizer } from '../utils/Localizer';
-import { InitializationState } from "./../utils/SharedEnum";
-import { ResultVisibility } from "./../common/SettingsCommon";
-import { Utils } from '../utils/Utils';
-import { ActionUtils } from '../utils/ActionUtils';
-import { ActionSdkHelper } from "../helper/ActionSdkHelper"
+import { Localizer } from "../utils/Localizer";
+import { ProgressState } from "./../utils/SharedEnum";
+import { Utils } from "../utils/Utils";
+import { ActionModelHelper } from "../helper/ActionModelHelper";
+import { ActionSdkHelper } from "../helper/ActionSdkHelper";
 
-const LOG_TAG = "CreationOrchestrators";
-orchestrator(initialize, () => {
-    Localizer.initialize()
-        .then(() => {
-            setAppInitialized(InitializationState.Initialized);
-        })
-        .catch(() => {
-            setAppInitialized(InitializationState.Failed);
-        });
+orchestrator(initialize, async () => {
+    try {
+        await Localizer.initialize();
+        setAppInitialized(ProgressState.Completed);
+    } catch (error) {
+        setAppInitialized(ProgressState.Failed);
+    }
 });
 
 orchestrator(fetchCurrentContext, async () => {
     let actionContext = await ActionSdkHelper.getContext();
-    actionContext.success && setContext(actionContext.context as actionSDK.ActionSdkContext);
+    if(actionContext.success) {
+        setContext(actionContext.context as actionSDK.ActionSdkContext);
+    }
 });
 
 orchestrator(sendAction, async () => {
     setSendingFlag(true);
     let actionInstance = getActionInstance();
-    ActionUtils.prepareActionInstance(actionInstance, toJS(getStore().context));
+    ActionModelHelper.prepareActionInstance(actionInstance, toJS(getStore().context));
     try {
         await ActionSdkHelper.createActionInstance(actionInstance);
-    }
-    catch(error) {
+    } catch(error) {
         console.error("Error: " + JSON.stringify(error)); //Add error log
     }
 });
@@ -55,7 +56,6 @@ orchestrator(previewAction, () => {
     }
 });
 
-
 let getActionInstance = (): actionSDK.Action => {
     let actionInstance: actionSDK.Action = {
         displayName: getStore().title,
@@ -69,16 +69,15 @@ let getActionInstance = (): actionSDK.Action => {
         ],
     };
 
-    if (getStore().settings.resultVisibility === ResultVisibility.Sender) {
+    if (getStore().settings.resultVisibility === actionSDK.Visibility.Sender) {
         actionInstance.dataTables[0].rowsVisibility = actionSDK.Visibility.Sender;
     } else {
         actionInstance.dataTables[0].rowsVisibility = actionSDK.Visibility.All;
     }
-
+    actionInstance.dataTables[0].canUserAddMultipleRows = getStore().settings.isMultiResponseAllowed;
 
     return actionInstance;
-}
-
+};
 
 orchestrator(validateAndSend, () => {
     const firstInvalidQuestionIndex = SurveyUtils.getFirstInvalidQuestionIndex(getStore().questions);
@@ -96,7 +95,7 @@ orchestrator(validateAndSend, () => {
         announceValidationError(firstInvalidQuestionIndex);
         updateActiveQuestionIndex(firstInvalidQuestionIndex);
     }
-})
+});
 
 function isSurveyValid(firstInvalidQuestionIndex: number) {
     setValidationMode(true);

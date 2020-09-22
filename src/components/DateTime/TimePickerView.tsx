@@ -1,9 +1,11 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
-import * as React from 'react';
-import { Popup, Input, List, ListProps, FocusTrapZone, ChevronDownIcon } from '@fluentui/react-northstar';
-import './TimePickerView.scss';
-import { Constants } from './../../utils/Constants';
-import { UxUtils } from './../../utils/UxUtils';
+import * as React from "react";
+import { Popup, Input, List, ListProps, FocusTrapZone, ChevronDownIcon } from "@fluentui/react-northstar";
+import "./TimePickerView.scss";
+import { Constants } from "./../../utils/Constants";
+import { UxUtils } from "./../../utils/UxUtils";
 
 export interface ITimePickerViewProps {
     placeholder?: string;
@@ -49,7 +51,7 @@ export class TimePickerView extends React.Component<ITimePickerViewProps, ITimeP
             selectedTimePickerItem: TimePickerView.listContainsItem(timePickerList, state.selectedTimePickerItem) ? state.selectedTimePickerItem : timePickerList[0],
             timePickerItemsList: timePickerList,
             prevMinTimeInMinutes: props.minTimeInMinutes
-        }
+        };
     }
 
     static getTimePickerList(minTimeInMinutes: number, locale: string): TimePickerItem[] {
@@ -136,13 +138,13 @@ export class TimePickerView extends React.Component<ITimePickerViewProps, ITimeP
                 position="below"
                 open={this.state.showPicker}
                 onOpenChange={(e, data) => {
-                    /* 
+                    /*
                     The following isTrusted check is added to prevent any non-user generated events from
-                    closing the Popup. 
+                    closing the Popup.
                     When the TimePicker is used within a RadioGroup, like in the case of Notification Settings,
-                    when the Enter key is pressed to open the popup, it actually trigers two events: one from 
-                    the Input element and the other from the underlying radio item. While the first event 
-                    opens the popup, the second event closes it immediately as it is treated as a click outside the popup. 
+                    when the Enter key is pressed to open the popup, it actually trigers two events: one from
+                    the Input element and the other from the underlying radio item. While the first event
+                    opens the popup, the second event closes it immediately as it is treated as a click outside the popup.
                     Since the second event is not user generated, the isTrusted flag will be false and we will
                     ignore it here.
                      */
@@ -156,8 +158,8 @@ export class TimePickerView extends React.Component<ITimePickerViewProps, ITimeP
                 content={
                     timePickerItems.length > 0 &&
                     <FocusTrapZone
-                        /* 
-                            This traps the focus within the List component below. 
+                        /*
+                            This traps the focus within the List component below.
                             On clicking outside the list, the list is dismissed.
                             Special handling is added for Esc key to dismiss the list using keyboard.
                         */
@@ -213,7 +215,8 @@ export class TimePickerView extends React.Component<ITimePickerViewProps, ITimeP
             "aria-hidden": true,
             value: this.state.selectedTimePickerItem.asString,
             readOnly: true,
-            "aria-readonly": false
+            "aria-readonly": false,
+            className: "time-input"
         };
 
         return (
@@ -231,7 +234,7 @@ export class TimePickerView extends React.Component<ITimePickerViewProps, ITimeP
             onClick={() => {
                 this.onTimePickerPreviewTap();
             }}
-        />
+        />;
     }
 
     onTimePickerPreviewTap() {
@@ -288,6 +291,6 @@ class TimePickerItem {
         let date = new Date();
         date.setHours(this.hours);
         date.setMinutes(this.minutes);
-        this.asString = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true });
+        this.asString = date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", hour12: true });
     }
 }

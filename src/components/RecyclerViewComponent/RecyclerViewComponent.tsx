@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import { RecyclerListView, DataProvider, LayoutProvider } from 'recyclerlistview/web';
+import { RecyclerListView, DataProvider, LayoutProvider } from "recyclerlistview/web";
 import { Flex } from "@fluentui/react-northstar";
 import "./RecyclerViewComponent.scss";
 
@@ -36,6 +39,22 @@ export class RecyclerViewComponent<T> extends React.Component<IRecyclerViewCompo
         return true;
     }
 
+    render() {
+        return (
+            <Flex fill column className="recycler-container">
+                <RecyclerListView
+                    key={this.props.gridWidth}
+                    rowHeight={this.props.rowHeight}
+                    layoutProvider={this.layoutProvider}
+                    dataProvider={this.dataProvider}
+                    rowRenderer={(type: RecyclerViewType, data: T, index: number): JSX.Element => {
+                        return this.props.onRowRender(type, index, data);
+                    }}
+                    {...this.props.nonDeterministicRendering ? this.getViewProps() : {}}
+                />
+            </Flex>);
+    }
+
     private initialize(props: IRecyclerViewComponentProps<T>) {
         //Create the layout provider
         //First method: Given an index return the type of item e.g ListItemType1, ListItemType2 in case you have variety of items in your list/grid
@@ -53,8 +72,7 @@ export class RecyclerViewComponent<T> extends React.Component<IRecyclerViewCompo
             (type: number, dim: any) => {
                 if (this.props.gridWidth) {
                     dim.width = this.props.gridWidth;
-                }
-                else {
+                } else {
                     dim.width = window.innerWidth;
                 }
                 dim.height = this.props.rowHeight;
@@ -81,21 +99,5 @@ export class RecyclerViewComponent<T> extends React.Component<IRecyclerViewCompo
         return {
             forceNonDeterministicRendering: true
         };
-    }
-
-    render() {
-        return (
-            <Flex fill column className="recycler-container">
-                <RecyclerListView
-                    key={this.props.gridWidth}
-                    rowHeight={this.props.rowHeight}
-                    layoutProvider={this.layoutProvider}
-                    dataProvider={this.dataProvider}
-                    rowRenderer={(type: RecyclerViewType, data: T, index: number): JSX.Element => {
-                        return this.props.onRowRender(type, index, data);
-                    }}
-                    {...this.props.nonDeterministicRendering ? this.getViewProps() : {}}
-                />
-            </Flex>);
     }
 }

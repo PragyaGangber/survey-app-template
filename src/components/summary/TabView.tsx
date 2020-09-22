@@ -1,17 +1,18 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
-import * as React from 'react';
-import { Flex, Text, Menu } from '@fluentui/react-northstar';
-import { ChevronDownIcon, ArrowDownIcon } from '@fluentui/react-icons-northstar';
-import { ResponderView } from './ResponderView';
-import getStore, { SummaryPageViewType, ResponsesListViewType } from "../../store/summary/Store";
-import { NonResponderView } from './NonResponderView';
+import * as React from "react";
+import { Flex, Text, Menu } from "@fluentui/react-northstar";
+import { ArrowLeftIcon, ChevronStartIcon } from "@fluentui/react-icons-northstar";
+import { ResponderView } from "./ResponderView";
+import getStore, { SummaryPageViewType, ResponsesListViewType } from "../../store/SummaryStore";
+import { NonResponderView } from "./NonResponderView";
 import { setCurrentView, goBack } from "../../actions/SummaryActions";
-import { INavBarComponentProps, NavBarItemType, NavBarComponent } from './../NavBarComponent';
+import { INavBarComponentProps, NavBarItemType, NavBarComponent } from "./../NavBarComponent";
 import { UxUtils} from "./../../utils/UxUtils";
 import { Constants} from "./../../utils/Constants";
-import * as actionSDK from "@microsoft/m365-action-sdk";
-import {Localizer} from '../../utils/Localizer';
-import { observer } from 'mobx-react';
+import {Localizer} from "../../utils/Localizer";
+import { observer } from "mobx-react";
 
 /**
  * This components consist  of the adjacent tabs with  Responder's and NonResponder's list
@@ -21,35 +22,35 @@ import { observer } from 'mobx-react';
 @observer
 export class TabView extends React.Component<any, any> {
 
-    componentDidMount() {
-        UxUtils.setFocus(document.body, Constants.FOCUSABLE_ITEMS.All);
-    }
-
     private items = [
         {
-            key: 'responders',
+            key: "responders",
             role: "tab",
             "aria-selected": getStore().currentView == SummaryPageViewType.ResponderView,
             "aria-label": Localizer.getString("Responders"),
             content: Localizer.getString("Responders"),
             onClick: () => {
-                setCurrentView(SummaryPageViewType.ResponderView)
+                setCurrentView(SummaryPageViewType.ResponderView);
             }
         },
         {
-            key: 'nonResponders',
+            key: "nonResponders",
             role: "tab",
             "aria-selected": getStore().currentView == SummaryPageViewType.NonResponderView,
             "aria-label": Localizer.getString("NonResponders"),
             content: Localizer.getString("NonResponders"),
             onClick: () => {
-                setCurrentView(SummaryPageViewType.NonResponderView)
+                setCurrentView(SummaryPageViewType.NonResponderView);
             }
         }
     ];
 
+    componentDidMount() {
+        UxUtils.setFocus(document.body, Constants.FOCUSABLE_ITEMS.All);
+    }
+
     render() {
-        var participationString: string = getStore().actionSummary.rowCount === 1 ?
+        let participationString: string = getStore().actionSummary.rowCount === 1 ?
             Localizer.getString("ParticipationIndicatorSingular", getStore().actionSummary.rowCount, getStore().memberCount)
             : Localizer.getString("ParticipationIndicatorPlural", getStore().actionSummary.rowCount, getStore().memberCount);
         if (getStore().actionInstance && getStore().actionInstance.dataTables[0].canUserAddMultipleRows) {
@@ -61,7 +62,7 @@ export class TabView extends React.Component<any, any> {
         }
         return (
 
-            <Flex column className={getStore().inPersonalAppMode ? "personal-app-body" : "body-container tabview-container no-mobile-footer"}>
+            <Flex column className={"body-container tabview-container no-mobile-footer"}>
                 {this.getNavBar()}
                 {getStore().responseViewType === ResponsesListViewType.AllResponses &&
                     <>
@@ -77,13 +78,13 @@ export class TabView extends React.Component<any, any> {
 
     private getFooterElement() {
 
-        if (!UxUtils.renderingForMobile() && !getStore().inPersonalAppMode) {
+        if (!UxUtils.renderingForMobile()) {
             return (
                 <Flex className="footer-layout tab-view-footer" gap={"gap.smaller"}>
                     <Flex vAlign="center" className="pointer-cursor" {...UxUtils.getTabKeyProps()} onClick={() => {
                         goBack();
                     }} >
-                        <ChevronDownIcon rotate={90} xSpacing="after" size="small" />
+                        <ChevronStartIcon xSpacing="after" size="small" />
                         <Text content={Localizer.getString("Back")} />
                     </Flex>
                 </Flex>
@@ -98,14 +99,14 @@ export class TabView extends React.Component<any, any> {
             let navBarComponentProps: INavBarComponentProps = {
                 title: Localizer.getString("ViewResponses"),
                 leftNavBarItem: {
-                    icon: <ArrowDownIcon size="large" rotate={90} />,
+                    icon: <ArrowLeftIcon size="large" />,
                     ariaLabel: Localizer.getString("Back"),
                     onClick: () => {
                         goBack();
                     },
                     type: NavBarItemType.BACK
                 }
-            }
+            };
 
             return (
                 <NavBarComponent {...navBarComponentProps} />
@@ -113,13 +114,5 @@ export class TabView extends React.Component<any, any> {
         } else {
             return null;
         }
-    }
-
-    private isCurrentUserCreator(): boolean {
-        return getStore().actionInstance && getStore().context.userId == getStore().actionInstance.creatorId;
-    }
-
-    private isSurveyActive(): boolean {
-        return getStore().actionInstance && getStore().actionInstance.status == actionSDK.ActionStatus.Active;
     }
 }

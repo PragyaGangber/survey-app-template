@@ -1,4 +1,5 @@
-@import './../scss/common.scss';
+@import '../../scss/common.scss';
+@import "../../scss/mixin.scss";
 
 .survey-container {
   padding: $parent-margin;
@@ -340,9 +341,15 @@ label.invalid {
 
 .optional-questions-alert-dialog {
   @extend .dialog-base;
-  width: fit-content !important;
-  @supports not (width: fit-content) {
-    width: auto !important;
-    max-width: 60% !important;
-   }
+  overflow-wrap: break-word;
+  width: 60% !important;
+}
+
+.settings-icon {
+  @include resolve-dir(margin-right, 8px);
+}
+
+.settings-footer {
+  cursor: pointer;
+  display: flex;
 }

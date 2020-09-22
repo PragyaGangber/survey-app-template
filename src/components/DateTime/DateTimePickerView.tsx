@@ -1,8 +1,10 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
-import * as React from 'react';
-import { Flex } from '@fluentui/react-northstar';
-import { DatePickerView, IDatePickerViewProps } from './DatePickerView';
-import { TimePickerView, ITimePickerViewProps } from './TimePickerView';
+import * as React from "react";
+import { Flex } from "@fluentui/react-northstar";
+import { DatePickerView, IDatePickerViewProps } from "./DatePickerView";
+import { TimePickerView, ITimePickerViewProps } from "./TimePickerView";
 
 export interface IDateTimePickerViewProps {
     placeholderDate?: string;
@@ -12,7 +14,7 @@ export interface IDateTimePickerViewProps {
     disabled?: boolean;
     showTimePicker?: boolean;
     renderForMobile?: boolean;
-    isPreview?: boolean
+    isPreview?: boolean;
     locale?: string;
     onSelect?: (date: Date) => void;
 }
@@ -30,7 +32,7 @@ export class DateTimePickerView extends React.Component<IDateTimePickerViewProps
         this.state = {
             selectedDate: this.props.value,
             selectedTime: DateTimePickerView.getTimeInMinutes(this.props.value ? this.props.value : new Date())
-        }
+        };
 
         this.props.onSelect(this.state.selectedDate);
     }
@@ -39,7 +41,7 @@ export class DateTimePickerView extends React.Component<IDateTimePickerViewProps
         return {
             selectedDate: props.value,
             selectedTime: DateTimePickerView.getTimeInMinutes(props.value ? props.value : new Date())
-        }
+        };
     }
 
     render() {
@@ -55,7 +57,7 @@ export class DateTimePickerView extends React.Component<IDateTimePickerViewProps
                     this.dateSelectCallback(newDate);
                 }
             }
-        }
+        };
 
         let timePickerProps: ITimePickerViewProps = {
             placeholder: this.props.placeholderTime,
@@ -66,7 +68,7 @@ export class DateTimePickerView extends React.Component<IDateTimePickerViewProps
                 this.timeSelectCallback(minutes);
             },
             locale: this.props.locale
-        }
+        };
 
         return (
             <Flex gap={this.props.renderForMobile ? null : "gap.small"} space={this.props.renderForMobile ? "between" : null}>
@@ -84,7 +86,7 @@ export class DateTimePickerView extends React.Component<IDateTimePickerViewProps
                 updatedDate.setMinutes(this.state.selectedTime % 60);
                 this.setState({
                     selectedDate: updatedDate
-                })
+                });
             } else {
                 let updatedHours = Math.floor(this.getMinTimeInMinutes(newDate) / 60);
                 let updatedMinutes = this.getMinTimeInMinutes(newDate) % 60;
@@ -99,12 +101,12 @@ export class DateTimePickerView extends React.Component<IDateTimePickerViewProps
                 this.setState({
                     selectedDate: updatedDate,
                     selectedTime: updatedHours * 60 + updatedMinutes
-                })
+                });
             }
         } else {
             this.setState({
                 selectedDate: updatedDate
-            })
+            });
         }
 
         this.props.onSelect(updatedDate);
@@ -116,7 +118,7 @@ export class DateTimePickerView extends React.Component<IDateTimePickerViewProps
         updatedDate.setMinutes(minutes % 60);
         this.setState({
             selectedTime: minutes
-        })
+        });
         this.props.onSelect(updatedDate);
     }
 

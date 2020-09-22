@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import './Shimmer.scss';
+import "./Shimmer.scss";
 
 export interface IShimmerLoaderProps {
     /**Profile image circular shimmer will be shown with radius 32px */

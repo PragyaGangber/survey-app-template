@@ -1,16 +1,19 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import { BarChartComponent, IBarChartItem } from "./../BarChartComponent";
 import { Divider, Flex, Text } from "@fluentui/react-northstar";
-import { LikeIcon, StarIcon } from '@fluentui/react-icons-northstar';
+import { LikeIcon, StarIcon } from "@fluentui/react-icons-northstar";
 import { observer } from "mobx-react";
-import "./../../scss/Summary.scss";
-import { QuestionDisplayType } from "../creation/questionContainer/QuestionDisplayType";
+import "./Summary.scss";
+import { QuestionDisplayType } from "../Creation/questionContainer/QuestionDisplayType";
 import { setCurrentView, setSelectedQuestionDrillDownInfo } from "../../actions/SummaryActions";
-import { SummaryPageViewType, QuestionDrillDownInfo } from "../../store/summary/Store";
-import { SurveyUtils } from "../../common/SurveyUtils";
-import {Localizer} from '../../utils/Localizer';
-import {UxUtils} from './../../utils/UxUtils';
-import * as actionSDK from '@microsoft/m365-action-sdk';
+import { SummaryPageViewType, QuestionDrillDownInfo } from "../../store/SummaryStore";
+import { SurveyUtils } from "../../utils/SurveyUtils";
+import { Localizer } from "../../utils/Localizer";
+import { UxUtils } from "./../../utils/UxUtils";
+import * as actionSDK from "@microsoft/m365-action-sdk";
 
 export interface IResponseAggregationContainerProps {
     questions: actionSDK.ActionDataColumn[];
@@ -21,17 +24,101 @@ export interface IResponseAggregationContainerProps {
 @observer
 export class ResponseAggregationContainer extends React.Component<IResponseAggregationContainerProps> {
 
+    render() {
+        const maxSingleDigit = 9;
+        let questionsSummaryList = [];
+        let questions = this.props.questions;
+        let responseAggregates = this.props.responseAggregates;
+        /*
+         Whenever number of questions cross single digit below class is added to align single and double digits
+        */
+        let className = questions.length > maxSingleDigit ? "question-number-container" : "";
+        for (let i = 0; i < questions.length; i++) {
+            let titleClassName: string = "question-title";
+            if (!questions[i].allowNullValue) {
+                titleClassName = titleClassName + " required";
+            }
+            let questionResultsData;
+            switch (questions[i].valueType) {
+
+                case actionSDK.ActionDataColumnValueType.SingleOption:
+                case actionSDK.ActionDataColumnValueType.MultiOption:
+
+                    questionResultsData = responseAggregates.hasOwnProperty(questions[i].name) ? JSON.parse(responseAggregates[questions[i].name]) : {};
+                    questionsSummaryList.push(
+                        <>
+                            <Flex gap="gap.smaller">
+                                <Flex className={className}>
+                                    <Text content={Localizer.getString("QuestionNumber", i + 1)} className="question-number" />
+                                </Flex>
+                                <Flex column className="overflow-hidden" fill>
+                                    <Text content={questions[i].displayName} className={titleClassName} />
+                                    {this.getMCQAggregatedView(questionResultsData, questions[i])}
+                                </Flex>
+                            </Flex>
+                            {i != questions.length - 1 && <Divider />}
+                        </>);
+                    break;
+
+                case actionSDK.ActionDataColumnValueType.Text:
+                case actionSDK.ActionDataColumnValueType.Date:
+                case actionSDK.ActionDataColumnValueType.DateTime:
+
+                    questionResultsData = responseAggregates.hasOwnProperty(questions[i].name) ? JSON.parse(responseAggregates[questions[i].name]) : [];
+                    let responseCount = 0;
+                    for (let i = 0; i < questionResultsData.length; i++) {
+                        if (!SurveyUtils.isEmptyOrNull(questionResultsData[i])) {
+                            responseCount++;
+                        }
+                    }
+                    questionsSummaryList.push(
+                        <>
+                            <Flex gap="gap.smaller">
+                                <Flex className={className}>
+                                    <Text content={Localizer.getString("QuestionNumber", i + 1)} className="question-number" />
+                                </Flex>
+                                <Flex column>
+                                    <Text content={questions[i].displayName} className={titleClassName} />
+                                    {this.getTextAggregationView(responseCount, questions[i])}
+                                </Flex>
+                            </Flex>
+                            {i != questions.length - 1 && <Divider />}
+                        </>);
+                    break;
+
+                case actionSDK.ActionDataColumnValueType.Numeric:
+
+                    questionResultsData = responseAggregates.hasOwnProperty(questions[i].name) ? JSON.parse(responseAggregates[questions[i].name]) : {};
+
+                    questionsSummaryList.push(
+                        <>
+                            <Flex gap="gap.smaller">
+                                <Flex className={className}>
+                                    <Text content={Localizer.getString("QuestionNumber", i + 1)} className="question-number" />
+                                </Flex>
+                                <Flex column>
+                                    <Text content={questions[i].displayName} className={titleClassName} />
+                                    {this.getNumericResponseAggregationView(questionResultsData, questions[i])}
+                                </Flex>
+                            </Flex>
+                            {i != questions.length - 1 && <Divider />}
+                        </>);
+            }
+        }
+        return (<div> {questionsSummaryList}</div >);
+    }
+
     private getLikeDislikeSummaryItem(questionResultsData: JSON, question: actionSDK.ActionDataColumn) {
-        var likeCount = 0, likePercentage = 0;
-        var dislikeCount = 0, dislikePercentage = 0;
+        let likeCount = 0, likePercentage = 0;
+        let dislikeCount = 0, dislikePercentage = 0;
 
         likeCount = questionResultsData[0] || 0;
         dislikeCount = questionResultsData[1] || 0;
-        var totalResponsesForQuestion = likeCount + dislikeCount;
+        let totalResponsesForQuestion = likeCount + dislikeCount;
         likePercentage = likeCount == 0 ? 0 : Math.round((likeCount * 100) / (likeCount + dislikeCount));
         dislikePercentage = dislikeCount == 0 ? 0 : Math.round((dislikeCount * 100) / (likeCount + dislikeCount));
-        var thumbsUpClasses = "reaction";
-        var thumbsDownClasses = "reaction";
+        let thumbsUpClasses = "reaction";
+        let thumbsDownClasses = "reaction";
         if (likeCount >= dislikeCount) {
             thumbsUpClasses = thumbsUpClasses + " yellow-color";
         }
@@ -65,18 +152,17 @@ export class ResponseAggregationContainer extends React.Component<IResponseAggre
     }
 
     private getMCQAggregatedView(questionResultsData: JSON, question: actionSDK.ActionDataColumn) {
-        var customProps = JSON.parse(question.properties);
-        var displayType: QuestionDisplayType = (customProps && customProps.hasOwnProperty("dt")) ? customProps["dt"] : QuestionDisplayType.None;
+        let customProps = JSON.parse(question.properties);
+        let displayType: QuestionDisplayType = (customProps && customProps.hasOwnProperty("dt")) ? customProps["dt"] : QuestionDisplayType.None;
         if (displayType == QuestionDisplayType.LikeDislike) {
             return (this.getLikeDislikeSummaryItem(questionResultsData, question));
-        }
-        else {
+        } else {
             let responsesAsBarChartItems: IBarChartItem[] = [];
             let totalResponsesForQuestion: number = 0;
             let average: number = 0;
 
-            for (var j = 0; j < question.options.length; j++) {
-                var option = question.options[j];
+            for (let j = 0; j < question.options.length; j++) {
+                let option = question.options[j];
                 let optionCount = questionResultsData[option.name] || 0;
                 average = average + (parseInt(option.name)) * optionCount;
                 totalResponsesForQuestion = totalResponsesForQuestion + optionCount;
@@ -125,7 +211,7 @@ export class ResponseAggregationContainer extends React.Component<IResponseAggre
     }
 
     private getTextAggregationView(responseCount: number, question: actionSDK.ActionDataColumn) {
-        var className = "mcq-summary-item question-summary-text";
+        let className = "mcq-summary-item question-summary-text";
         if (responseCount === 0) {
             return (
                 <Text
@@ -140,9 +226,9 @@ export class ResponseAggregationContainer extends React.Component<IResponseAggre
     }
 
     private getNumericResponseAggregationView(questionResultsData: JSON, question: actionSDK.ActionDataColumn) {
-        var sum = questionResultsData.hasOwnProperty("s") ? questionResultsData["s"] : 0;
-        var average = questionResultsData.hasOwnProperty("a") ? questionResultsData["a"] : 0;
-        var responsesCount = (sum === 0) ? this.props.totalResponsesCount : (Math.round(sum / average));
+        let sum = questionResultsData.hasOwnProperty("s") ? questionResultsData["s"] : 0;
+        let average = questionResultsData.hasOwnProperty("a") ? questionResultsData["a"] : 0;
+        let responsesCount = (sum === 0) ? this.props.totalResponsesCount : (Math.round(sum / average));
         const sumString = <Text content={Localizer.getString("Sum", sum)} />;
         const averageString = <Text content={Localizer.getString("Average", average.toFixed(2))} />;
         let className = "";
@@ -171,7 +257,7 @@ export class ResponseAggregationContainer extends React.Component<IResponseAggre
 
     private setDrillDownInfo(responseCount: number, question: actionSDK.ActionDataColumn, choiceIndex: number, subTitle: string) {
         if (responseCount !== 0) {
-            var questionDrillDownInfo: QuestionDrillDownInfo = {
+            let questionDrillDownInfo: QuestionDrillDownInfo = {
                 id: parseInt(question.name),
                 title: question.displayName,
                 type: question.valueType,
@@ -179,7 +265,7 @@ export class ResponseAggregationContainer extends React.Component<IResponseAggre
                 choiceIndex: choiceIndex,
                 displayType: JSON.parse(question.properties)["dt"],
                 subTitle: subTitle
-            }
+            };
             setSelectedQuestionDrillDownInfo(questionDrillDownInfo);
             setCurrentView(SummaryPageViewType.ResponseAggregationView);
         }
@@ -204,90 +290,6 @@ export class ResponseAggregationContainer extends React.Component<IResponseAggre
                 />
             </Flex>
         );
-    }
-
-    render() {
-        const maxSingleDigit = 9;
-        let questionsSummaryList = [];
-        let questions = this.props.questions;
-        let responseAggregates = this.props.responseAggregates;
-        /*
-         Whenever number of questions cross single digit below class is added to align single and double digits
-        */
-        let className = questions.length > maxSingleDigit ? "question-number-container" : "";
-        for (let i = 0; i < questions.length; i++) {
-            let titleClassName: string = "question-title";
-            if (!questions[i].allowNullValue) {
-                titleClassName = titleClassName + " required";
-            }
-
-            switch (questions[i].valueType) {
-
-                case actionSDK.ActionDataColumnValueType.SingleOption:
-                case actionSDK.ActionDataColumnValueType.MultiOption:
-
-                    var questionResultsData = responseAggregates.hasOwnProperty(questions[i].name) ? JSON.parse(responseAggregates[questions[i].name]) : {};
-                    questionsSummaryList.push(
-                        <>
-                            <Flex gap="gap.smaller">
-                                <Flex className={className}>
-                                    <Text content={Localizer.getString("QuestionNumber", i + 1)} className="question-number" />
-                                </Flex>
-                                <Flex column className="overflow-hidden" fill>
-                                    <Text content={questions[i].displayName} className={titleClassName} />
-                                    {this.getMCQAggregatedView(questionResultsData, questions[i])}
-                                </Flex>
-                            </Flex>
-                            {i != questions.length - 1 && <Divider />}
-                        </>);
-                    break;
-
-                case actionSDK.ActionDataColumnValueType.Text:
-                case actionSDK.ActionDataColumnValueType.Date:
-                case actionSDK.ActionDataColumnValueType.DateTime:
-
-                    var questionResultsData = responseAggregates.hasOwnProperty(questions[i].name) ? JSON.parse(responseAggregates[questions[i].name]) : [];
-                    let responseCount = 0;
-                    for (let i = 0; i < questionResultsData.length; i++) {
-                        if (!SurveyUtils.isEmptyOrNull(questionResultsData[i])) {
-                            responseCount++;
-                        }
-                    }
-                    questionsSummaryList.push(
-                        <>
-                            <Flex gap="gap.smaller">
-                                <Flex className={className}>
-                                    <Text content={Localizer.getString("QuestionNumber", i + 1)} className="question-number" />
-                                </Flex>
-                                <Flex column>
-                                    <Text content={questions[i].displayName} className={titleClassName} />
-                                    {this.getTextAggregationView(responseCount, questions[i])}
-                                </Flex>
-                            </Flex>
-                            {i != questions.length - 1 && <Divider />}
-                        </>);
-                    break;
-
-                case actionSDK.ActionDataColumnValueType.Numeric:
-
-                    var questionResultsData = responseAggregates.hasOwnProperty(questions[i].name) ? JSON.parse(responseAggregates[questions[i].name]) : {};
-
-                    questionsSummaryList.push(
-                        <>
-                            <Flex gap="gap.smaller">
-                                <Flex className={className}>
-                                    <Text content={Localizer.getString("QuestionNumber", i + 1)} className="question-number" />
-                                </Flex>
-                                <Flex column>
-                                    <Text content={questions[i].displayName} className={titleClassName} />
-                                    {this.getNumericResponseAggregationView(questionResultsData, questions[i])}
-                                </Flex>
-                            </Flex>
-                            {i != questions.length - 1 && <Divider />}
-                        </>);
-            }
-        }
-        return (<div> {questionsSummaryList}</div >);
     }
 
 }

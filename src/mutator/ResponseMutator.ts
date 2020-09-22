@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { mutator } from "satcheljs";
-import getStore from "../store/response/Store";
+import getStore from "../store/ResponseStore";
 import { setActionInstance, updateResponse, initializeExternal, setValidationModeOn, setAppInitialized, resetResponse, setResponseViewMode, setSendingFlag, setCurrentView, setSavedActionInstanceRow, updateCurrentResponseIndex, setMyResponses, setCurrentResponse, setContext, setResponseSubmissionFailed, updateTopMostErrorIndex, setIsActionDeleted } from "../actions/ResponseActions";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 import { toJS } from "mobx";
@@ -62,22 +65,22 @@ mutator(resetResponse, (msg) => {
 mutator(setResponseViewMode, (msg) => {
     const store = getStore();
     store.responseViewMode = msg.responseState;
-})
+});
 
 mutator(setSendingFlag, (msg) => {
     const store = getStore();
     store.isSendActionInProgress = msg.value;
-})
+});
 
 mutator(setCurrentView, (msg) => {
     const store = getStore();
     store.currentView = msg.view;
-})
+});
 
 mutator(setSavedActionInstanceRow, (msg) => {
     const store = getStore();
     store.savedActionInstanceRow = msg.actionInstanceRow;
-})
+});
 
 mutator(updateCurrentResponseIndex, (msg) => {
     const store = getStore();
@@ -105,7 +108,7 @@ mutator(setCurrentResponse, (msg) => {
 mutator(setResponseSubmissionFailed, (msg) => {
     const store = getStore();
     store.responseSubmissionFailed = msg.value;
-})
+});
 
 mutator(setIsActionDeleted, (msg) => {
     const store = getStore();

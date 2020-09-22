@@ -1,10 +1,13 @@
-import { createStore } from 'satcheljs';
-import "../../orchestrators/SummaryOrchestrator";
-import "../../mutator/SummaryMutator";
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { createStore } from "satcheljs";
+import "../orchestrators/SummaryOrchestrator";
+import "../mutator/SummaryMutator";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { ProgressState } from './../../utils/SharedEnum';
-import { QuestionDisplayType } from '../../components/creation/questionContainer/QuestionDisplayType';
-import { Utils } from '../../utils/Utils';
+import { ProgressState } from "../utils/SharedEnum";
+import { QuestionDisplayType } from "../components/Creation/questionContainer/QuestionDisplayType";
+import { Utils } from "../utils/Utils";
 
 export enum SummaryPageViewType {
     Main,
@@ -65,7 +68,6 @@ interface ISurveySummaryStore {
     progressStatus: SummaryProgressStatus;
     currentResponseIndex: number;
     responseViewType: ResponsesListViewType;
-    inPersonalAppMode: boolean;
     selectedQuestionDrillDownInfo: QuestionDrillDownInfo;
     isActionDeleted: boolean;
 }
@@ -104,7 +106,6 @@ const store: ISurveySummaryStore = {
     },
     currentResponseIndex: -1,
     responseViewType: ResponsesListViewType.AllResponses,
-    inPersonalAppMode: false,
     selectedQuestionDrillDownInfo: {
         id: -1,
         title: "",
@@ -113,6 +114,6 @@ const store: ISurveySummaryStore = {
         displayType: -1
     },
     isActionDeleted: false
-}
+};
 
-export default createStore<ISurveySummaryStore>('summaryStore', store);
+export default createStore<ISurveySummaryStore>("summaryStore", store);

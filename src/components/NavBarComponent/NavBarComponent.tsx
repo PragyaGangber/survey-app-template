@@ -1,6 +1,9 @@
-import * as React from 'react';
-import { Flex, Text } from '@fluentui/react-northstar';
-import './NavBarComponent.scss';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import { Flex, Text } from "@fluentui/react-northstar";
+import "./NavBarComponent.scss";
 
 export enum NavBarItemType {
     BACK
@@ -22,21 +25,6 @@ export interface INavBarComponentProps {
 }
 
 export class NavBarComponent extends React.PureComponent<INavBarComponentProps> {
-    private isBackButtonHandlerRegistered: boolean;
-
-    componentWillMount() {
-        this.registerBackButtonHandlerIfRequired(this.props.leftNavBarItem);
-        this.registerBackButtonHandlerIfRequired(this.props.rightNavBarItem);
-    }
-
-    private registerBackButtonHandlerIfRequired(navBarItem: INavBarItem) {
-        if (!navBarItem) {
-            return;
-        }
-        if (navBarItem.type == NavBarItemType.BACK && navBarItem.onClick) {
-            this.isBackButtonHandlerRegistered = true;
-        }
-    }
 
     render() {
         return (
@@ -61,7 +49,7 @@ export class NavBarComponent extends React.PureComponent<INavBarComponentProps> 
                 className={navBarItemClassName}
                 role="button"
                 aria-label={navBarItem.ariaLabel}
-                onClick={() => { navBarItem.onClick() }}
+                onClick={() => { navBarItem.onClick(); }}
                 tabIndex={0}
             >
                 {navBarItem.icon}

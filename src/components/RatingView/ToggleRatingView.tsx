@@ -1,9 +1,12 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
 import { Flex } from "@fluentui/react-northstar";
-import { LikeIcon } from '@fluentui/react-icons-northstar';
-import './Rating.scss';
-import { UxUtils } from '../../utils/UxUtils';
-import { Localizer } from '../../utils/Localizer';
+import { LikeIcon } from "@fluentui/react-icons-northstar";
+import "./Rating.scss";
+import { UxUtils } from "../../utils/UxUtils";
+import { Localizer } from "../../utils/Localizer";
 
 export interface IToggleRatingViewProps {
     defaultValue?: boolean;
@@ -18,24 +21,17 @@ interface IState {
 
 export class ToggleRatingView extends React.PureComponent<IToggleRatingViewProps, IState> {
 
-    constructor(props: IToggleRatingViewProps) {
-        super(props);
-        this.state = {
-            value: props.defaultValue
-        }
-    }
-
     static getDerivedStateFromProps(props: IToggleRatingViewProps, state) {
         return {
             value: props.defaultValue
         };
     }
 
-    private onChange(value: boolean) {
-        if (!this.props.disabled) {
-            this.setState({ value: value });
-            this.props.onChange(value);
-        }
+    constructor(props: IToggleRatingViewProps) {
+        super(props);
+        this.state = {
+            value: props.defaultValue
+        };
     }
 
     render() {
@@ -59,7 +55,7 @@ export class ToggleRatingView extends React.PureComponent<IToggleRatingViewProps
                     onClick={isAccessibilityDisabled ? null : () => {
                         this.onChange(true);
                     }}
-                    className={this.state.value === true ? className : ''} />
+                    className={this.state.value === true ? className : ""} />
 
                 <LikeIcon
                     aria-label={this.state.value === false ? Localizer.getString("DislikeTextSelected") : Localizer.getString("DislikeText")}
@@ -73,8 +69,15 @@ export class ToggleRatingView extends React.PureComponent<IToggleRatingViewProps
                     onClick={isAccessibilityDisabled ? null : () => {
                         this.onChange(false);
                     }}
-                    className={this.state.value === false ? className : ''} />
+                    className={this.state.value === false ? className : ""} />
             </Flex>
         );
+    }
+
+    private onChange(value: boolean) {
+        if (!this.props.disabled) {
+            this.setState({ value: value });
+            this.props.onChange(value);
+        }
     }
 }

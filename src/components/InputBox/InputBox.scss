@@ -18,5 +18,36 @@
     line-height: normal;
     overflow-x: hidden;
     overflow-y: hidden;
+    .theme-default & {
+      color: #252423;
+    };
+    .theme-dark & {
+      color: #c8c6c4;
+    };
+    .theme-contrast & {
+      color: #fff;
+    }
+  }
+}
+TextArea {
+  .theme-default & {
+    color: #252423;
+  };
+  .theme-dark & {
+    color: #c8c6c4;
+  };
+  .theme-contrast & {
+    color: #fff;
+  }
+}
+Input {
+  .theme-default & {
+    color: #252423;
+  };
+  .theme-dark & {
+    color: #c8c6c4;
+  };
+  .theme-contrast & {
+    color: #fff;
   }
 }

@@ -1,4 +1,5 @@
 {
+    "tag": "survey-teams-app",
     "id": "<packageId>",
     "name": "Survey",
     "description": "Create a Survey",
@@ -40,7 +41,7 @@
         },
         "icons": {
             "outline": "images/outline.png",
-            "color": "images/color.png"
+            "color": "images/appIcon.png"
         },
         "accentColor": "#4464ee"
     },

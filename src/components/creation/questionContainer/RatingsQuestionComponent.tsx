@@ -1,13 +1,15 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from "react";
-import './../../../scss/Creation.scss';
-import { Dropdown, Checkbox, Flex, Text, Divider, DropdownItemProps, DropdownProps } from '@fluentui/react-northstar';
-import { SurveyUtils } from "../../../common/SurveyUtils";
+import "../Creation.scss";
+import { Dropdown, Checkbox, Flex, Text, Divider, DropdownItemProps, DropdownProps } from "@fluentui/react-northstar";
+import { SurveyUtils } from "../../../utils/SurveyUtils";
 import { updateCustomProps } from "../../../actions/CreationActions";
 import { QuestionDisplayType } from "./QuestionDisplayType";
 import * as actionSDK from "@microsoft/m365-action-sdk";
-import { StarRatingView, ToggleRatingView, ScaleRatingView } from "./../../RatingView";
+import { StarRatingView, ToggleRatingView, ScaleRatingView } from "../../RatingView";
 import { Localizer } from "../../../utils/Localizer";
-
 
 export interface IRatingsQuestionComponentProps {
     question: actionSDK.ActionDataColumn;
@@ -17,17 +19,13 @@ export interface IRatingsQuestionComponentProps {
 }
 
 /**
- * Question component used for rating type question. The format used for rating type is similar to MCQ and 
+ * Question component used for rating type question. The format used for rating type is similar to MCQ and
  * options are provided based on the rating level selected
  * Different type of rating questions: star(level/option 5 and 10), scale(level/option 5 and 10) and like/dislike(level/option 2)
  */
 export class RatingsQuestionComponent extends React.Component<IRatingsQuestionComponentProps> {
 
-    private selectedLevel = JSON.parse(this.props.question.properties)["level"];
-    private selectedQuestionType = JSON.parse(this.props.question.properties)["type"];
-    private questionDisplayType = JSON.parse(this.props.question.properties)["dt"];
-
-    state = { isDropDownOpen: false }
+    state = { isDropDownOpen: false };
 
     typeChoiceSet = [
         {
@@ -53,7 +51,25 @@ export class RatingsQuestionComponent extends React.Component<IRatingsQuestionCo
         }
     ];
 
+    private selectedLevel = JSON.parse(this.props.question.properties)["level"];
+    private selectedQuestionType = JSON.parse(this.props.question.properties)["type"];
+    private questionDisplayType = JSON.parse(this.props.question.properties)["dt"];
 
+    render() {
+        return (
+            <div>
+                {this.getQuestionView()}
+                <Flex column>
+                    <Flex className="rating-setting" gap="gap.large">
+                        {this.getTypeDropDown()}
+                        {this.questionDisplayType !== QuestionDisplayType.LikeDislike ? this.getLevelDropDown() : null}
+                    </Flex>
+                    <Divider className="question-divider" />
+                    {this.getCheckBox()}
+                </Flex>
+            </div>
+        );
+    }
 
     private setQuestionDisplayType() {
         switch (this.selectedQuestionType) {
@@ -76,11 +92,10 @@ export class RatingsQuestionComponent extends React.Component<IRatingsQuestionCo
         }
     }
 
-
     private handleOpenChange = (e, { open }) => {
         this.setState({
             isDropDownOpen: this.selectedQuestionType !== Localizer.getString("LikeDislike") ? open : false,
-        })
+        });
     }
 
     private getTypeDropDown = () => {
@@ -100,8 +115,9 @@ export class RatingsQuestionComponent extends React.Component<IRatingsQuestionCo
             };
         });
         let getA11yStatusMessage = (options) => {
-            if (this.props.renderForMobile)
+            if (this.props.renderForMobile) {
                 return Localizer.getString("DropDownListInfoMobile", ratingTypes.length);
+            }
             return Localizer.getString("DropDownListInfo", ratingTypes.length);
         };
         return (
@@ -146,8 +162,9 @@ export class RatingsQuestionComponent extends React.Component<IRatingsQuestionCo
             };
         });
         let getA11yStatusMessage = (options) => {
-            if (this.props.renderForMobile)
+            if (this.props.renderForMobile) {
                 return Localizer.getString("DropDownListInfoMobile", ratingScales.length);
+            }
             return Localizer.getString("DropDownListInfo", ratingScales.length);
         };
         return (
@@ -188,7 +205,6 @@ export class RatingsQuestionComponent extends React.Component<IRatingsQuestionCo
         );
     }
 
-
     private getQuestionView() {
         switch (this.questionDisplayType) {
             case QuestionDisplayType.FiveStar:
@@ -200,22 +216,5 @@ export class RatingsQuestionComponent extends React.Component<IRatingsQuestionCo
             case QuestionDisplayType.LikeDislike:
                 return (<div className="question-preview rating-star"><ToggleRatingView isPreview /></div>);
         }
-    }
-
-
-    render() {
-        return (
-            <div>
-                {this.getQuestionView()}
-                <Flex column>
-                    <Flex className="rating-setting" gap="gap.large">
-                        {this.getTypeDropDown()}
-                        {this.questionDisplayType !== QuestionDisplayType.LikeDislike ? this.getLevelDropDown() : null}
-                    </Flex>
-                    <Divider className="question-divider" />
-                    {this.getCheckBox()}
-                </Flex>
-            </div>
-        );
     }
 }

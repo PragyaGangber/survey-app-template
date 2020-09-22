@@ -1,13 +1,10 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export enum ProgressState {
     NotStarted,
     InProgress,
     Partial,
     Completed,
-    Failed
-}
-
-export enum InitializationState {
-    NotInitialized = 1,
-    Initialized,
     Failed
 }

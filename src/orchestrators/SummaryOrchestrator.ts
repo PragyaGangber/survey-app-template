@@ -1,4 +1,7 @@
-import { orchestrator } from "satcheljs"
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { orchestrator } from "satcheljs";
 import {
     updateDueDate,
     fetchNonResponders,
@@ -17,7 +20,6 @@ import {
     setCurrentView,
     setProgressStatus,
     updateMyRows,
-    fetchUserProfilePic,
     updateMemberCount,
     addActionInstanceRows,
     updateContinuationToken,
@@ -33,14 +35,14 @@ import {
     setIsActionDeleted
 } from "../actions/SummaryActions";
 import { initializeExternal } from "../actions/ResponseActions";
-import getStore, { SummaryPageViewType } from '../store/summary/Store';
+import getStore, { SummaryPageViewType } from "../store/SummaryStore";
 import * as actionSDK from "@microsoft/m365-action-sdk";
 import { ProgressState } from "./../utils/SharedEnum";
-import { SurveyUtils } from '../common/SurveyUtils';
-import {ActionError} from './../Utils/ActionError';
-import {Localizer} from '../utils/Localizer';
-import {Constants} from "./../utils/Constants";
-import { ActionSdkHelper } from "../helper/ActionSdkHelper"
+import { SurveyUtils } from "../utils/SurveyUtils";
+import { Localizer } from "../utils/Localizer";
+import { Constants } from "./../utils/Constants";
+import { ActionSdkHelper } from "../helper/ActionSdkHelper";
+import { initializeMyResponses } from "../actions/MyResponsesActions";
 
 const handleErrorResponse = (error: actionSDK.ApiError) => {
     if (error && error.code == "404") {
@@ -50,7 +52,7 @@ const handleErrorResponse = (error: actionSDK.ApiError) => {
 const handleError = (error: actionSDK.ApiError, requestType: string) => {
     handleErrorResponse(error);
     setProgressStatus({ [requestType]: ProgressState.Failed });
-}
+};
 
 /*
 * This Orchestrator function calls are to fetch data from APIs which will be presented in ResultView.
@@ -66,7 +68,7 @@ orchestrator(initialize, async () => {
         setProgressStatus({ currentContext: ProgressState.InProgress });
         try {
             let response = await ActionSdkHelper.getContext();
-            if(response.success) {
+            if (response.success) {
                 setContext(response.context);
                 fetchLocalization();
                 fetchActionInstance(true);
@@ -74,12 +76,10 @@ orchestrator(initialize, async () => {
                 fetchMyResponse();
                 fetchMemberCount();
                 setProgressStatus({ currentContext: ProgressState.Completed });
-            }
-            else {
+            } else {
                 handleError(response.error, "currentContext");
             }
-        }
-        catch(error) {
+        } catch (error) {
             handleError(error, "currentContext");
         }
     }
@@ -89,36 +89,37 @@ orchestrator(initialize, async () => {
 * fetchLocalization(): Get the string localization for all the strings used in the ResultView
 * and store it for this session to avoid making multiple network calls.
 */
-orchestrator(fetchLocalization, (msg) => {
+orchestrator(fetchLocalization, async (msg) => {
     if (getStore().progressStatus.localizationState == ProgressState.NotStarted
         || getStore().progressStatus.localizationState == ProgressState.Failed) {
         setProgressStatus({ localizationState: ProgressState.InProgress });
-        Localizer.initialize()
-            .then(() => {
-                setProgressStatus({ localizationState: ProgressState.Completed });
-            })
-            .catch((error: ActionError) => {
-                setProgressStatus({ localizationState: ProgressState.Failed });
-            });
+        try {
+            await Localizer.initialize();
+            setProgressStatus({ localizationState: ProgressState.Completed });
+        } catch (error) {
+            setProgressStatus({ localizationState: ProgressState.Failed });
+        }
     }
-})
+});
 
 /**
 * fetchMyResponse(): Get the response of user accessing the instance (response of logged in user)
 * and store it for this session to avoid making multiple network calls.
 */
-orchestrator(fetchMyResponse, () => {
+orchestrator(fetchMyResponse, async () => {
     if (getStore().progressStatus.myActionInstanceRow == ProgressState.NotStarted
         || getStore().progressStatus.myActionInstanceRow == ProgressState.Failed) {
         setProgressStatus({ myActionInstanceRow: ProgressState.InProgress });
-        SurveyUtils.fetchMyResponses(getStore().context)
-            .then((rows) => {
-                updateMyRows(rows);
-                fetchUserDetails([getStore().context.userId]);
-                setProgressStatus({ myActionInstanceRow: ProgressState.Completed });
-            }).catch((error: ActionError) => {
-                setProgressStatus({ myActionInstanceRow: ProgressState.Failed });
-            });
+        let response = await SurveyUtils.fetchMyResponses(getStore().context);
+        if (response.success) {
+            let rows = response.rows;
+            updateMyRows(rows);
+            initializeMyResponses(rows);
+            fetchUserDetails([getStore().context.userId]);
+            setProgressStatus({ myActionInstanceRow: ProgressState.Completed });
+        } else {
+            setProgressStatus({ myActionInstanceRow: ProgressState.Failed });
+        }
     }
 });
 
@@ -126,57 +127,47 @@ orchestrator(fetchMyResponse, () => {
 * fetchMemberCount(): get count of members in a subscription
 * and store it for this session to avoid making multiple network calls.
 */
-orchestrator(fetchMemberCount, async(msg) => {
+orchestrator(fetchMemberCount, async (msg) => {
     if (getStore().progressStatus.memberCount == ProgressState.NotStarted
         || getStore().progressStatus.memberCount == ProgressState.Failed) {
         setProgressStatus({ memberCount: ProgressState.InProgress });
         try {
             let response = await ActionSdkHelper.getMemberCount(getStore().context.subscription);
-            if(response.success) {
+            if (response.success) {
                 updateMemberCount(response.memberCount);
                 setProgressStatus({ memberCount: ProgressState.Completed });
-            }
-            else {
+            } else {
                 setProgressStatus({ memberCount: ProgressState.Failed });
                 handleError(response.error, "fetchMemberCount");
             }
-        }
-        catch(error) {
+        } catch (error) {
             setProgressStatus({ memberCount: ProgressState.Failed });
             handleError(error, "fetchMemberCount");
         }
     }
-})
+});
 
 /**
 * fetchActionInstance(): Get the action instance
 * and store it for this session to avoid making multiple network calls.
 */
-orchestrator(fetchActionInstance, async(msg) => {
+orchestrator(fetchActionInstance, async (msg) => {
     if (getStore().progressStatus.actionInstance != ProgressState.InProgress) {
         if (msg.updateState) {
             setProgressStatus({ actionInstance: ProgressState.InProgress });
         }
-        try {
-            let response = await ActionSdkHelper.getActionInstance(getStore().context.actionId);
-            if(response.success) {
-                updateActionInstance(response.action);
+        let response = await ActionSdkHelper.getActionInstance(getStore().context.actionId);
+        let actionInstance = response.actionInstance;
+        if (response.success && actionInstance && actionInstance.success) {
+                updateActionInstance(actionInstance.action);
                 if (msg.updateState) {
-                    setProgressStatus({ actionInstance: ProgressState.Completed })
+                    setProgressStatus({ actionInstance: ProgressState.Completed });
                 }
-            }
-            else {
-                if (msg.updateState) {
-                    setProgressStatus({ actionInstance: ProgressState.Failed })
-                }
-                handleError(response.error, "fetchActionInstance");
-            }
-        }
-        catch(error) {
+        } else {
             if (msg.updateState) {
-                setProgressStatus({ actionInstance: ProgressState.Failed })
+                setProgressStatus({ actionInstance: ProgressState.Failed });
             }
-            handleError(error, "fetchActionInstance");
+            handleError((response.error || actionInstance.error), "fetchActionInstance");
         }
     }
 });
@@ -185,75 +176,54 @@ orchestrator(fetchActionInstance, async(msg) => {
 * fetchUserDetails(): Get the user Details for all the responders of the survey
 * and store it for this session to avoid making multiple network calls.
 */
-orchestrator(fetchUserDetails, async(msg) => {
+orchestrator(fetchUserDetails, async (msg) => {
     let userIds: string[] = msg.userIds;
     try {
         let response = await ActionSdkHelper.getResponderDetails(getStore().context.subscription, userIds);
-        if(response.success && response.members) {
+        if (response.success && response.members) {
             let users: {
                 [key: string]: actionSDK.SubscriptionMember;
             } = {};
             response.members.forEach(member => {
-                users[member.id] = {id: member.id, displayName: member.displayName}
+                users[member.id] = { id: member.id, displayName: member.displayName };
             });
             updateUserProfileMap(users);
             if (response.memberIdsNotFound) {
                 let userProfile: {
                     [key: string]: actionSDK.SubscriptionMember;
                 } = {};
-                for (var userId of response.memberIdsNotFound) {
+                for (let userId of response.memberIdsNotFound) {
                     userProfile[userId] = { id: userId, displayName: null };
                 }
                 updateUserProfileMap(userProfile);
             }
-        }
-        else {
+        } else {
             handleError(response.error, "fetchUserDetails");
         }
-    }
-    catch(error){
+    } catch (error) {
         handleError(error, "fetchUserDetails");
     }
-});
-
-orchestrator(fetchUserProfilePic, (msg) => {
-    let userIds: string[] = msg.userIds;
-
-    if (msg.userIds.length > 10) {
-        fetchUserProfilePic(userIds.slice(10, userIds.length));
-        userIds = userIds.slice(0, 10);
-    }
-    /*********************** YET TO IMPLEMENT IN NEW SDK (Will remove after PR)*********************/
-    /*
-    ActionSDK.APIs.getUserProfilePhotos(userIds)
-        .then((profilePhotosFetchResult: ActionSDK.ProfilePhotosFetchResult) => {
-            updateUserProfilePic(profilePhotosFetchResult.userIdToPhotoMap);
-        })
-        .catch((error: ActionError) => {
-            // addLog(ActionSDK.LogLevel.Error, `fetchUserProfilePic failed, Error: ${error.errorCode}, ${error.errorMessage}`);
-        });
-    */
 });
 
 /**
 * fetchActionInstanceRows(): Get all the responses for the survey
 * and store it for this session to avoid making multiple network calls.
 */
-orchestrator(fetchActionInstanceRows, async(msg) => {
+orchestrator(fetchActionInstanceRows, async (msg) => {
     if (getStore().progressStatus.actionInstanceRow == ProgressState.Partial
         || getStore().progressStatus.actionInstanceRow == ProgressState.Failed
         || getStore().progressStatus.actionInstanceRow == ProgressState.NotStarted) {
         setProgressStatus({ actionInstanceRow: ProgressState.InProgress });
         try {
             let response = await ActionSdkHelper.getActionDataRows(getStore().context, null, getStore().continuationToken, 30, null);
-            if(response.success) {
+            if (response.success) {
                 let rows: actionSDK.ActionDataRow[] = [];
-                for (var row of response.dataRows) {
+                for (let row of response.dataRows) {
                     rows.push(row);
                 }
 
                 let userIds: string[] = [];
-                for (var row of rows) {
+                for (let row of rows) {
                     userIds.push(row.creatorId);
                 }
 
@@ -261,19 +231,17 @@ orchestrator(fetchActionInstanceRows, async(msg) => {
                 if (userIds.length > 0) {
                     fetchUserDetails(userIds);
                 }
-                if (response.continuationToken ) {
+                if (response.continuationToken) {
                     updateContinuationToken(response.continuationToken);
                     setProgressStatus({ actionInstanceRow: ProgressState.Partial });
                 } else {
                     setProgressStatus({ actionInstanceRow: ProgressState.Completed });
                 }
-            }
-            else {
+            } else {
                 setProgressStatus({ actionInstanceRow: ProgressState.Failed });
                 handleError(response.error, "fetchActionInstanceRows");
             }
-        }
-        catch(error) {
+        } catch (error) {
             setProgressStatus({ actionInstanceRow: ProgressState.Failed });
             handleError(error, "fetchActionInstanceRows");
         }
@@ -284,31 +252,28 @@ orchestrator(fetchActionInstanceRows, async(msg) => {
 * fetchNonResponders(): Get all the non-participants for the survey
 * and store it for this session to avoid making multiple network calls.
 */
-orchestrator(fetchNonResponders, async() => {
+orchestrator(fetchNonResponders, async () => {
     if (getStore().progressStatus.nonResponder == ProgressState.NotStarted
         || getStore().progressStatus.nonResponder == ProgressState.Failed) {
         setProgressStatus({ nonResponder: ProgressState.InProgress });
         try {
             let response = await ActionSdkHelper.getNonResponders(getStore().context.actionId, getStore().context.subscription.id);
-            if(response.success) {
-               
-                let userProfile: { [key: string]: actionSDK.SubscriptionMember } = {}
-                if(response.nonParticipants){
-                response.nonParticipants.forEach((user: actionSDK.SubscriptionMember) => {
-                    userProfile[user.id] = user;
-                });
-            }
+            if (response.success) {
+
+                let userProfile: { [key: string]: actionSDK.SubscriptionMember } = {};
+                if (response.nonParticipants) {
+                    response.nonParticipants.forEach((user: actionSDK.SubscriptionMember) => {
+                        userProfile[user.id] = user;
+                    });
+                }
                 updateUserProfileMap(userProfile);
-                fetchUserProfilePic(Object.keys(userProfile));
                 updateNonResponders(response.nonParticipants);
                 setProgressStatus({ nonResponder: ProgressState.Completed });
-            }
-            else {
+            } else {
                 setProgressStatus({ nonResponder: ProgressState.Failed });
                 handleError(response.error, "fetchNonResponders");
             }
-        }
-        catch(error) {
+        } catch (error) {
             setProgressStatus({ nonResponder: ProgressState.Failed });
             handleError(error, "fetchNonResponders");
         }
@@ -319,7 +284,7 @@ orchestrator(fetchNonResponders, async() => {
 * closeSurvey(): Close the survey. Sbuscribers will no longer able to respond.
 * This is available only for the creator of survey
 */
-orchestrator(closeSurvey, async() => {
+orchestrator(closeSurvey, async () => {
     if (getStore().progressStatus.closeActionInstance != ProgressState.InProgress) {
         let failedCallback = () => {
             setProgressStatus({ closeActionInstance: ProgressState.Failed });
@@ -327,7 +292,7 @@ orchestrator(closeSurvey, async() => {
         };
 
         setProgressStatus({ closeActionInstance: ProgressState.InProgress });
-        var actionInstanceUpdateInfo: actionSDK.ActionUpdateInfo = {
+        let actionInstanceUpdateInfo: actionSDK.ActionUpdateInfo = {
             id: getStore().context.actionId,
             version: getStore().actionInstance.version,
             status: actionSDK.ActionStatus.Closed
@@ -335,15 +300,13 @@ orchestrator(closeSurvey, async() => {
         try {
             let updateActionInstance = await ActionSdkHelper.updateActionInstanceStatus(actionInstanceUpdateInfo);
             if (updateActionInstance.success) {
-                    surveyCloseAlertOpen(false);
-                    await ActionSdkHelper.closeCardView();
-            } 
-            else {
+                surveyCloseAlertOpen(false);
+                await ActionSdkHelper.closeCardView();
+            } else {
                 failedCallback();
                 handleError(updateActionInstance.error, "closeSurvey");
             }
-        }
-        catch (error) {
+        } catch (error) {
             failedCallback();
             handleError(error, "closeSurvey");
         }
@@ -353,7 +316,7 @@ orchestrator(closeSurvey, async() => {
 /**
 * deleteSurvey(): Delete the survey. This is available only for the creator of survey
 */
-orchestrator(deleteSurvey, async() => {
+orchestrator(deleteSurvey, async () => {
     if (getStore().progressStatus.deleteActionInstance != ProgressState.InProgress) {
         let failedCallback = () => {
             setProgressStatus({ deleteActionInstance: ProgressState.Failed });
@@ -366,13 +329,11 @@ orchestrator(deleteSurvey, async() => {
             if (deleteInstance.success) {
                 surveyDeleteAlertOpen(false);
                 await ActionSdkHelper.closeCardView();
-            }
-            else {
+            } else {
                 failedCallback();
                 handleError(deleteInstance.error, "deleteInstance");
             }
-        }
-        catch(error) {
+        } catch (error) {
             failedCallback();
             handleError(error, "deleteInstance");
         }
@@ -382,7 +343,7 @@ orchestrator(deleteSurvey, async() => {
 /**
 * updateDueDate(): Change the due date of Survey
 */
-orchestrator(updateDueDate, async(actionMessage) => {
+orchestrator(updateDueDate, async (actionMessage) => {
     if (getStore().progressStatus.updateActionInstance != ProgressState.InProgress) {
         let callback = (success: boolean) => {
             setProgressStatus({ updateActionInstance: success ? ProgressState.Completed : ProgressState.Failed });
@@ -390,23 +351,21 @@ orchestrator(updateDueDate, async(actionMessage) => {
         };
 
         setProgressStatus({ updateActionInstance: ProgressState.InProgress });
-        var actionInstanceUpdateInfo: actionSDK.ActionUpdateInfo = {
+        let actionInstanceUpdateInfo: actionSDK.ActionUpdateInfo = {
             id: getStore().context.actionId,
             version: getStore().actionInstance.version,
             expiryTime: actionMessage.dueDate
         };
         try {
             let updateActionInstance = await ActionSdkHelper.updateActionInstanceStatus(actionInstanceUpdateInfo);
-            if(updateActionInstance.success) {
-                callback(true)
-                    surveyExpiryChangeAlertOpen(false);
-            } 
-            else {
+            if (updateActionInstance.success) {
+                callback(true);
+                surveyExpiryChangeAlertOpen(false);
+            } else {
                 callback(false);
                 handleError(updateActionInstance.error, "updateDueDate");
             }
-        }
-        catch(error) {
+        } catch (error) {
             callback(false);
             handleError(error, "updateDueDate");
         }
@@ -416,21 +375,19 @@ orchestrator(updateDueDate, async(actionMessage) => {
 /**
 * fetchActionInstanceSummary(): Fetch the aggregate summary for responses of all the questions
 */
-orchestrator(fetchActionInstanceSummary, async() => {
+orchestrator(fetchActionInstanceSummary, async () => {
     if (getStore().progressStatus.actionSummary != ProgressState.InProgress) {
         setProgressStatus({ actionSummary: ProgressState.InProgress });
         try {
             let response = await ActionSdkHelper.getActionSummary(getStore().context.actionId);
-            if(response.success) {
+            if (response.success) {
                 updateSummary(response.summary);
                 setProgressStatus({ actionSummary: ProgressState.Completed });
-            }
-            else {
+            } else {
                 setProgressStatus({ actionSummary: ProgressState.Failed });
                 handleError(response.error, "fetchActionInstanceSummary");
             }
-        }
-        catch(error) {
+        } catch (error) {
             setProgressStatus({ actionSummary: ProgressState.Failed });
             handleError(error, "fetchActionInstanceSummary");
         }
@@ -440,26 +397,24 @@ orchestrator(fetchActionInstanceSummary, async() => {
 /**
 * downloadCSV(): It allows user the downlaod all response in a csv file
 */
-orchestrator(downloadCSV, async(msg) => {
+orchestrator(downloadCSV, async (msg) => {
     if (getStore().progressStatus.downloadData != ProgressState.InProgress) {
         setProgressStatus({ downloadData: ProgressState.InProgress });
         try {
             let downloadResponseCSV = await ActionSdkHelper.downloadResponseAsCSV(
-                    getStore().context.actionId,
-                    Localizer.getString(
-                        "SurveyResult",
-                        getStore().actionInstance.dataTables[0].dataColumns[0].displayName
-                    ).substring(0, Constants.ACTION_RESULT_FILE_NAME_MAX_LENGTH)
-                );
-            if(downloadResponseCSV.success) {
+                getStore().context.actionId,
+                Localizer.getString(
+                    "SurveyResult",
+                    getStore().actionInstance.dataTables[0].dataColumns[0].displayName
+                ).substring(0, Constants.ACTION_RESULT_FILE_NAME_MAX_LENGTH)
+            );
+            if (downloadResponseCSV.success) {
                 setProgressStatus({ downloadData: ProgressState.Completed });
-             }
-            else {
+            } else {
                 setProgressStatus({ downloadData: ProgressState.Failed });
                 handleError(downloadResponseCSV.error, "downloadCSV");
             }
-        }
-        catch(error) {
+        } catch (error) {
             setProgressStatus({ downloadData: ProgressState.Failed });
             handleError(error, "downloadCSV");
         }

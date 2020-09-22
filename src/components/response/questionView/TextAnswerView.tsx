@@ -1,7 +1,10 @@
-import * as React from 'react';
-import { IQuestionProps, QuestionView } from './QuestionView';
-import { InputBox,IInputBoxProps } from './../../InputBox';
-import {Localizer} from '../../../utils/Localizer';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as React from "react";
+import { IQuestionProps, QuestionView } from "./QuestionView";
+import { InputBox,IInputBoxProps } from "./../../InputBox";
+import { Localizer } from "../../../utils/Localizer";
 
 export class TextAnswerView extends React.Component<IQuestionProps> {
     render() {
@@ -12,21 +15,24 @@ export class TextAnswerView extends React.Component<IQuestionProps> {
             multiline: true,
             placeholder: Localizer.getString("EnterAnswer")
         };
+        if (value) {
+            props.value = value;
+        }
         if (this.props.editable) {
             props = {
                 ...props,
                 defaultValue: value,
-                onBlur: (e) => {
+                onChange: (e) => {
                     this.props.updateResponse((e.target as HTMLInputElement).value);
                 }
-            }
+            };
         } else {
             props = {
                 ...props,
                 value: value,
                 disabled: true,
-                className: 'break-word'
-            }
+                className: "break-word"
+            };
         }
         return (
             <QuestionView {...this.props}>

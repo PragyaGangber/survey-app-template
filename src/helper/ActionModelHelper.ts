@@ -1,7 +1,10 @@
-import * as actionSDK from "@microsoft/m365-action-sdk";
-import { Utils } from "./Utils";
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
-export namespace ActionUtils {
+import * as actionSDK from "@microsoft/m365-action-sdk";
+import { Utils } from "../utils/Utils";
+
+export namespace ActionModelHelper {
     export function getActionInstanceProperty(
         actionInstance: actionSDK.Action,
         propertyName: string
